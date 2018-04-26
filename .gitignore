@@ -1,3 +1,4 @@
 # ignored files/folder
 
 *.pyc
+__pycache__
