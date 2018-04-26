@@ -10,7 +10,7 @@ import imutils
 import cv2
 
 class MotionDetector:
-	def __init__(self, accumWeight=0.5, deltaThresh=5, minArea=5000):
+	def __init__(self, accumWeight=0.5, deltaThresh=5, minArea=3500):
 		self.isv2 = imutils.is_cv2() # determine the OpenCV version
 		self.accumWeight = accumWeight # the frame accumulation weight
 		self.deltaThresh = deltaThresh # fixed threshold for the delta image
@@ -35,6 +35,7 @@ class MotionDetector:
 		thresh = cv2.threshold(frameDelta, self.deltaThresh, 255,
 			cv2.THRESH_BINARY)[1]
 		thresh = cv2.dilate(thresh, None, iterations=2)
+		cv2.imshow("Thresh", thresh)
 
 		# find contours in the thresholded image
 		cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL,
