@@ -3,6 +3,7 @@
 # Press 'q' for quit
 
 from motiondetector import MotionDetector
+from facedetector import FaceDetector
 from imutils.video import WebcamVideoStream
 from imutils.video import FPS
 import numpy as np
@@ -12,8 +13,8 @@ import time
 import cv2
 
 # Camera resolution setting
-frameWidth = 320
-frameHeight = 240
+frameWidth = 640
+frameHeight = 480
 
 # Start camera videostream
 print("[INFO] starting camera...")
@@ -28,6 +29,9 @@ time.sleep(1.0) # for warm up camera, 1 second
 motionDetector = MotionDetector()
 noframesRead = 0 # no. of frames read
 
+# Initialize face detector
+faceDetector = FaceDetector()
+
 # FPS calculation
 fps = FPS().start()
 
@@ -37,21 +41,31 @@ while True:
 	frameShow = frame.copy()
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	gray = cv2.GaussianBlur(gray, (21, 21), 0)
-	locs = motionDetector.update(gray)
+	motionLocs = motionDetector.update(gray)
 
 	# form a nice average before motion detection
-	if noframesRead < 60:
+	if noframesRead < 30:
 		noframesRead += 1
 		continue
 
-	if len(locs) > 0:
+	if len(motionLocs) > 0:
+		faceLocs = faceDetector.detect(frame)
+		if len(faceLocs) >0:
+			print(str(len(faceLocs)) + " face found.")
+			for top, right, bottom, left in faceLocs:
+				top *= 4
+				right *= 4
+				bottom *= 4
+				left *= 4
+				cv2.rectangle(frameShow,(left, top), (right, bottom), (0, 255, 0), 2)
+
 		# initialize the minimum and maximum (x, y)-coordinates
 		(minX, minY) = (np.inf, np.inf)
 		(maxX, maxY) = (-np.inf, -np.inf)
 
 		# loop over the locations of motion and accumulate the
 		# minimum and maximum locations of the bounding boxes
-		for l in locs:
+		for l in motionLocs:
 			(x, y, w, h) = cv2.boundingRect(l)
 			(minX, maxX) = (min(minX, x), max(maxX, x + w))
 			(minY, maxY) = (min(minY, y), max(maxY, y + h))
