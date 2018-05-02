@@ -1,12 +1,28 @@
 # Office surveillance system
-# Usage: Python3 surveillance.py
-# Press 'q' for quit
 
-from motiondetector import MotionDetector
-from facedetector import FaceDetector
+'''
+Normal Usage(surveillance and face recognition): 
+python3 surveillance.py
+
+Train a new classifier when face images databse changed:
+python3 surveillance.py -t
+
+Collect face images for training and saving:
+python3 surveillance.py -c
+
+Show help text:
+python3 surveillance.py -h
+
+Press 'q' for quit program
+'''
+
+from motion_detector import MotionDetector
+from face_detector import FaceDetector
+from knn_classifier_train import KnnClassifierTrain
 from imutils.video import WebcamVideoStream
 from imutils.video import FPS
 import numpy as np
+import argparse
 import datetime
 import imutils
 import time
@@ -16,6 +32,21 @@ import cv2
 frameWidth = 640
 frameHeight = 480
 
+# Construct the argument parser
+ap = argparse.ArgumentParser()
+ap.add_argument("-t", "--train", help="train a KNN faces classifier", action="store_true")
+ap.add_argument("-c", "--collect_faces", help="collect faces images for saving and training", action="store_true")
+args = ap.parse_args()
+
+if args.train:
+	print("[INFO] Training KNN classifier...")
+	knnclassifierTrain = KnnClassifierTrain()
+	knnclassifierTrain.train(train_dir="faces/train", model_save_path="classifier/trained_knn_model.clf", n_neighbors=None)
+	exit()
+elif args.collect_faces:
+	print("collect...")
+	exit()
+
 # Start camera videostream
 print("[INFO] starting camera...")
 # 0 for default webcam, 1/2/3... for external webcam
@@ -23,7 +54,7 @@ videoStream = WebcamVideoStream(src=1)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, frameWidth)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frameHeight)
 videoStream.start()
-time.sleep(1.0) # for warm up camera, 1 second
+time.sleep(0.2) # for warm up camera, 0.5 second
 
 # Initialize motion detector
 motionDetector = MotionDetector()
@@ -49,10 +80,13 @@ while True:
 		continue
 
 	if len(motionLocs) > 0:
+		# may consider to process in every other frame to accelerate
+		# !!!!!!!!!!!!!!!!!!!!!
 		faceLocs = faceDetector.detect(frame)
-		if len(faceLocs) >0:
+		if len(faceLocs) > 0:
 			print(str(len(faceLocs)) + " face found.")
 			for top, right, bottom, left in faceLocs:
+				# Scale back up face locations
 				top *= 4
 				right *= 4
 				bottom *= 4

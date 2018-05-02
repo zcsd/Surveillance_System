@@ -1,10 +1,12 @@
 # Class MotionDetector
 
-# -------------Temporal Difference Method---------------
-# accumulate the weighted average between
-# the current frame and the previous frames, then compute
-# the pixel-wise differences between the current frame
-# and running average, faster algorithm for real time system
+'''
+-------------Temporal Difference algorithm---------------
+Accumulate the weighted average between the current frame
+and the previous frames, then compute the pixel-wise differences
+between the current frame and running average, 
+faster algorithm for real time system
+'''
 
 import imutils
 import cv2
