@@ -44,7 +44,7 @@ args = ap.parse_args()
 if args.train:
 	print("[INFO] Training KNN classifier...")
 	knnclassifierTrain = KnnClassifierTrain()
-	knnclassifierTrain.train(train_dir="faces/train", model_save_path="classifier/trained_knn_model.clf", n_neighbors=None)
+	knnclassifierTrain.train(trainDir="faces/train", modelSavePath="classifier/trained_knn_model.clf", nNeighbors=None)
 	exit()
 elif args.collect_faces:
 	print("[INFO] Start to collect face images...")
@@ -95,13 +95,13 @@ while True:
 		if len(faceLocs) > 0:
 			print("[INFO] " + str(len(faceLocs)) + " face found.")
 			# Start face recognition
-			predictions = knnfaceRecognizer.predict(X_img=frame, X_face_locations=faceLocs, knn_clf=knnClf)
+			predictions = knnfaceRecognizer.predict(xImg=frame, xFaceLocs=faceLocs, knnClf=knnClf)
 			for name, (top, right, bottom, left) in predictions:
 				print("- Found {} at ({}, {})".format(name, left, top))
-				# cv2.rectangle(frameShow, (left, top), (right, bottom), (0, 255, 0), 2)
-				cv2.rectangle(frameShow, (left, bottom), (right, bottom+25), (0, 255, 0), -1)
-				cv2.putText(frameShow, name, (int((right-left)/3)+left,bottom+18), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 2)
-			
+				cv2.rectangle(frameShow, (left, top), (right, bottom), (0, 255, 0), 2)
+				cv2.rectangle(frameShow, (left, bottom), (right, bottom+15), (0, 255, 0), -1)
+				cv2.putText(frameShow, name, (int((right-left)/3)+left,bottom+12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+			'''
 			# Draw green bounding box on faces in frameShow
 			for top, right, bottom, left in faceLocs:
 				# Scale back up face locations
@@ -110,7 +110,7 @@ while True:
 				bottom *= 1
 				left *= 1
 				cv2.rectangle(frameShow,(left, top), (right, bottom), (0, 255, 0), 2)
-			
+			'''
 		# initialize the minimum and maximum (x, y)-coordinates
 		(minX, minY) = (np.inf, np.inf)
 		(maxX, maxY) = (-np.inf, -np.inf)
@@ -128,8 +128,7 @@ while True:
 	timestamp = datetime.datetime.now()
 	ts = timestamp.strftime("%d %b %Y %H:%M:%S")
 
-	cv2.putText(frameShow, ts, (10, frameShow.shape[0] - 10), 
-		cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+	cv2.putText(frameShow, ts, (10, frameShow.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
 	cv2.imshow("Frame", frameShow)
 
 	fps.update()
