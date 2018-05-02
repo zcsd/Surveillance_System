@@ -1,29 +1,14 @@
-# Office surveillance system
+# Program FaceCollector
 
 '''
-Normal Usage(surveillance and face recognition): 
-python3 surveillance.py
-
-Train a new classifier when face images databse changed:
-python3 surveillance.py -t
-
-Collect face images for training and saving:
-python3 surveillance.py -c
-
-Show help text:
-python3 surveillance.py -h
-
-Press 'q' for quit program
+This script is for collecting face images to do training and saving.
 '''
 
 from motion_detector import MotionDetector
 from face_detector import FaceDetector
-from knn_classifier_train import KnnClassifierTrain
 from imutils.video import WebcamVideoStream
 from imutils.video import FPS
 import numpy as np
-from subprocess import call
-import argparse
 import datetime
 import imutils
 import time
@@ -33,27 +18,10 @@ import cv2
 frameWidth = 640
 frameHeight = 480
 
-# Construct the argument parser
-ap = argparse.ArgumentParser()
-ap.add_argument("-t", "--train", help="train a KNN faces classifier", action="store_true")
-ap.add_argument("-c", "--collect_faces", help="collect faces images for saving and training", action="store_true")
-args = ap.parse_args()
-
-if args.train:
-	print("[INFO] Training KNN classifier...")
-	knnclassifierTrain = KnnClassifierTrain()
-	knnclassifierTrain.train(train_dir="faces/train", model_save_path="classifier/trained_knn_model.clf", n_neighbors=None)
-	exit()
-elif args.collect_faces:
-	print("[INFO] Start to collect face images...")
-	call(["python3", "face_collector.py"])
-	print("[INFO] Collection Done.")
-	exit()
-
 # Start camera videostream
 print("[INFO] starting camera...")
 # 0 for default webcam, 1/2/3... for external webcam
-videoStream = WebcamVideoStream(src=1)
+videoStream = WebcamVideoStream(src=0)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, frameWidth)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frameHeight)
 videoStream.start()
@@ -88,6 +56,12 @@ while True:
 		faceLocs = faceDetector.detect(frame)
 		if len(faceLocs) > 0:
 			print("[INFO] "+str(len(faceLocs)) + " face found.")
+			# Save image with faces detected
+			timestamp = datetime.datetime.now()
+			ts = timestamp.strftime("%Y%b%d%H%M%S_%f")
+			imagePath = "images/" + ts + ".jpg"
+			cv2.imwrite(imagePath, frame)
+
 			for top, right, bottom, left in faceLocs:
 				# Scale back up face locations
 				top *= 4
@@ -111,11 +85,6 @@ while True:
 		cv2.rectangle(frameShow, (minX, minY), (maxX, maxY),
 			(0, 0, 255), 3)
 
-	timestamp = datetime.datetime.now()
-	ts = timestamp.strftime("%d %b %Y %H:%M:%S")
-
-	cv2.putText(frameShow, ts, (10, frameShow.shape[0] - 10), 
-		cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
 	cv2.imshow("Frame", frameShow)
 
 	fps.update()
