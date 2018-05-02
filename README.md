@@ -1,29 +1,39 @@
-This is an office surveillance system.
+# Office Surveillance System 
 
-Basic Function:
-1. Video Streaming
-2. Motion Detection
-3. Face Detection
-4. Face Recognition
-5. Face Images Collection
-6. KNN Classifier Training
-7. Communicate with other hosts(to do)
-8. Alert(to do)
+## Basic Function:
 
----------------- How to use ----------------------
-Normal Usage(surveillance and face recognition): 
-python3 surveillance.py
+- [x] **1. Video Streaming**
 
-Train a new classifier when face images databse changed:
-python3 surveillance.py -t
+- [x] **2. Motion Detection**
 
-Collect face images for training and saving:
-python3 surveillance.py -c
+- [x] **3. Face Detection**
 
-Show help text:
-python3 surveillance.py -h
+- [x] **4. Face Recognition**
 
-Press 'q' for quit program
-----------------------------------------------------
+- [x] **5. Face Images Collection**
 
-2 May 2018
+- [x] **6. KNN Classifier Training**
+
+- [ ]  **7. Communicate with other hosts**
+
+- [ ]  **8. Alert**
+
+- [ ] **...**
+  
+## How to use:
+
+**Normal Usage(surveillance and face recognition):**
+- python3 surveillance.py
+
+**Train a new classifier when face images databse changed:**
+- python3 surveillance.py -t
+
+**Collect face images for training and saving:**
+- python3 surveillance.py -c
+
+**Show help text:**
+- python3 surveillance.py -h
+
+**Press 'q' for quit program**
+
+*2 May 2018*
