@@ -21,11 +21,11 @@ frameHeight = 480
 # Start camera videostream
 print("[INFO] starting camera...")
 # 0 for default webcam, 1/2/3... for external webcam
-videoStream = WebcamVideoStream(src=0)
+videoStream = WebcamVideoStream(src=1)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, frameWidth)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frameHeight)
 videoStream.start()
-time.sleep(0.5) # for warm up camera, 0.5 second
+time.sleep(1.0) # for warm up camera, 1 second
 
 # Initialize motion detector
 motionDetector = MotionDetector()
@@ -64,10 +64,10 @@ while True:
 
 			for top, right, bottom, left in faceLocs:
 				# Scale back up face locations
-				top *= 4
-				right *= 4
-				bottom *= 4
-				left *= 4
+				top *= 1
+				right *= 1
+				bottom *= 1
+				left *= 1
 				cv2.rectangle(frameShow,(left, top), (right, bottom), (0, 255, 0), 2)
 
 		# initialize the minimum and maximum (x, y)-coordinates

@@ -59,7 +59,7 @@ videoStream = WebcamVideoStream(src=1)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, frameWidth)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frameHeight)
 videoStream.start()
-time.sleep(0.2) # for warm up camera, 0.5 second
+time.sleep(1.0) # for warm up camera, 1 second
 
 # Initialize motion detector
 motionDetector = MotionDetector()
@@ -83,9 +83,8 @@ while True:
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	gray = cv2.GaussianBlur(gray, (21, 21), 0)
 	motionLocs = motionDetector.update(gray)
-
 	# form a nice average before motion detection
-	if noframesRead < 20:
+	if noframesRead < 30:
 		noframesRead += 1
 		continue
 
@@ -99,10 +98,10 @@ while True:
 			predictions = knnfaceRecognizer.predict(X_img=frame, X_face_locations=faceLocs, knn_clf=knnClf)
 			for name, (top, right, bottom, left) in predictions:
 				print("- Found {} at ({}, {})".format(name, left, top))
-				cv2.rectangle(frameShow, (left, top), (right, bottom), (0, 255, 0), 2)
+				# cv2.rectangle(frameShow, (left, top), (right, bottom), (0, 255, 0), 2)
 				cv2.rectangle(frameShow, (left, bottom), (right, bottom+25), (0, 255, 0), -1)
-				cv2.putText(frameShow, name, (int((right-left)/3.5)+left,bottom+18), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 2)
-			'''
+				cv2.putText(frameShow, name, (int((right-left)/3)+left,bottom+18), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 2)
+			
 			# Draw green bounding box on faces in frameShow
 			for top, right, bottom, left in faceLocs:
 				# Scale back up face locations
@@ -111,7 +110,7 @@ while True:
 				bottom *= 1
 				left *= 1
 				cv2.rectangle(frameShow,(left, top), (right, bottom), (0, 255, 0), 2)
-			'''
+			
 		# initialize the minimum and maximum (x, y)-coordinates
 		(minX, minY) = (np.inf, np.inf)
 		(maxX, maxY) = (-np.inf, -np.inf)
