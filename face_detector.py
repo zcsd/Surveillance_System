@@ -11,7 +11,7 @@ import face_recognition as fr
 import cv2
 
 class FaceDetector:
-	def __init__(self, scale=0.25):
+	def __init__(self, scale=1):
 		self.scale = scale 
 
 	def detect(self, image):

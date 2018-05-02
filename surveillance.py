@@ -19,19 +19,21 @@ Press 'q' for quit program
 from motion_detector import MotionDetector
 from face_detector import FaceDetector
 from knn_classifier_train import KnnClassifierTrain
+from knn_face_recognizer import KnnFaceRecognizer
 from imutils.video import WebcamVideoStream
 from imutils.video import FPS
-import numpy as np
 from subprocess import call
+import numpy as np
 import argparse
+import pickle
 import datetime
 import imutils
 import time
 import cv2
 
 # Camera resolution setting
-frameWidth = 640
-frameHeight = 480
+frameWidth = 320
+frameHeight = 240
 
 # Construct the argument parser
 ap = argparse.ArgumentParser()
@@ -51,13 +53,13 @@ elif args.collect_faces:
 	exit()
 
 # Start camera videostream
-print("[INFO] starting camera...")
+print("[INFO] Starting camera...")
 # 0 for default webcam, 1/2/3... for external webcam
 videoStream = WebcamVideoStream(src=1)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, frameWidth)
 videoStream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frameHeight)
 videoStream.start()
-time.sleep(0.5) # for warm up camera, 0.5 second
+time.sleep(0.2) # for warm up camera, 0.5 second
 
 # Initialize motion detector
 motionDetector = MotionDetector()
@@ -65,6 +67,11 @@ noframesRead = 0 # no. of frames read
 
 # Initialize face detector
 faceDetector = FaceDetector()
+
+# Initialize face recognizer and load trained classifier
+with open("classifier/trained_knn_model.clf", 'rb') as f:
+	knnClf = pickle.load(f)
+knnfaceRecognizer = KnnFaceRecognizer()
 
 # FPS calculation
 fps = FPS().start()
@@ -78,7 +85,7 @@ while True:
 	motionLocs = motionDetector.update(gray)
 
 	# form a nice average before motion detection
-	if noframesRead < 30:
+	if noframesRead < 20:
 		noframesRead += 1
 		continue
 
@@ -87,15 +94,24 @@ while True:
 		# !!!!!!!!!!!!!!!!!!!!!
 		faceLocs = faceDetector.detect(frame)
 		if len(faceLocs) > 0:
-			print("[INFO] "+str(len(faceLocs)) + " face found.")
+			print("[INFO] " + str(len(faceLocs)) + " face found.")
+			# Start face recognition
+			predictions = knnfaceRecognizer.predict(X_img=frame, X_face_locations=faceLocs, knn_clf=knnClf)
+			for name, (top, right, bottom, left) in predictions:
+				print("- Found {} at ({}, {})".format(name, left, top))
+				cv2.rectangle(frameShow, (left, top), (right, bottom), (0, 255, 0), 2)
+				cv2.rectangle(frameShow, (left, bottom), (right, bottom+25), (0, 255, 0), -1)
+				cv2.putText(frameShow, name, (int((right-left)/3.5)+left,bottom+18), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 2)
+			'''
+			# Draw green bounding box on faces in frameShow
 			for top, right, bottom, left in faceLocs:
 				# Scale back up face locations
-				top *= 4
-				right *= 4
-				bottom *= 4
-				left *= 4
+				top *= 1
+				right *= 1
+				bottom *= 1
+				left *= 1
 				cv2.rectangle(frameShow,(left, top), (right, bottom), (0, 255, 0), 2)
-
+			'''
 		# initialize the minimum and maximum (x, y)-coordinates
 		(minX, minY) = (np.inf, np.inf)
 		(maxX, maxY) = (-np.inf, -np.inf)
@@ -107,9 +123,8 @@ while True:
 			(minX, maxX) = (min(minX, x), max(maxX, x + w))
 			(minY, maxY) = (min(minY, y), max(maxY, y + h))
 
-		# draw the bounding box
-		cv2.rectangle(frameShow, (minX, minY), (maxX, maxY),
-			(0, 0, 255), 3)
+		# draw red bounding box on moving body
+		cv2.rectangle(frameShow, (minX, minY), (maxX, maxY), (0, 0, 255), 3)
 
 	timestamp = datetime.datetime.now()
 	ts = timestamp.strftime("%d %b %Y %H:%M:%S")

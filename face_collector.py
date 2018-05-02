@@ -1,7 +1,7 @@
-# Program FaceCollector
+# Class FaceCollector
 
 '''
-This script is for collecting face images to do training and saving.
+This class is for collecting face images to do training and saving.
 '''
 
 from motion_detector import MotionDetector
