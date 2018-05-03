@@ -19,9 +19,9 @@ import math
 import face_recognition as fr
 
 """
-:param trainDir: directory that contains a sub-directory for each known person, with its name.
+:param train_dir: directory that contains a sub-directory for each known person, with its name.
  Structure:
-    <trainDir>/
+    <train_dir>/
     ├── <person1>/
     │   ├── <somename1>.jpeg
     │   ├── <somename2>.jpeg
@@ -31,54 +31,54 @@ import face_recognition as fr
     │   └── <somename2>.jpeg
     └── ...
 
-:param modelSavePath: path to save model on disk
-:param nNeighbors: number of neighbors to weigh in classification. Chosen automatically if not specified
-:param knnAlgo: underlying data structure to support knn.default is ball_tree
-:param verbose: verbosity of training
+:param model_save_path: path to save model on disk
+:param n_neighbors: number of neighbors to weigh in classification. Chosen automatically if not specified
+:param _knn_algo: underlying data structure to support knn.default is ball_tree
+:param _verbose: verbosity of training
 """
 
 class KnnClassifierTrain:
-    def __init__(self, knnAlgo='ball_tree', verbose = False):
-        self.knnAlgo = knnAlgo
-        self.verbose = verbose
+    def __init__(self, _knn_algo='ball_tree', _verbose = False):
+        self._knn_algo = _knn_algo
+        self._verbose = _verbose
 
-    def train(self, trainDir, modelSavePath, nNeighbors):
-        knnAlgo = self.knnAlgo
-        verbose = self.verbose
+    def train(self, train_dir, model_save_path, n_neighbors):
+        _knn_algo = self._knn_algo
+        _verbose = self._verbose
         X = []
         y = []
 
         # Loop through each person in the training set
-        for classDir in os.listdir(trainDir):
-            if not os.path.isdir(os.path.join(trainDir, classDir)):
+        for class_dir in os.listdir(train_dir):
+            if not os.path.isdir(os.path.join(train_dir, class_dir)):
                 continue
 
             # Loop through each training image for the current person
-            for imgPath in image_files_in_folder(os.path.join(trainDir, classDir)):
-                image = fr.load_image_file(imgPath)
-                faceBoxes = fr.face_locations(image)
+            for image_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
+                image = fr.load_image_file(image_path)
+                faces_boxes = fr.face_locations(image)
 
-                if len(faceBoxes) != 1:
+                if len(faces_boxes) != 1:
                     # If there are no people (or too many people) in a training image, skip the image.
-                    if verbose:
-                        print("Image {} not suitable for training: {}".format(imgPath, "Didn't find a face" if len(faceBoxes) < 1 else "Found more than one face"))
+                    if _verbose:
+                        print("Image {} not suitable for training: {}".format(image_path, "Didn't find a face" if len(faces_boxes) < 1 else "Found more than one face"))
                 else:
                     # Add face encoding for current image to the training set
-                    X.append(fr.face_encodings(image, known_face_locations=faceBoxes)[0])
-                    y.append(classDir)
+                    X.append(fr.face_encodings(image, known_face_locations=faces_boxes)[0])
+                    y.append(class_dir)
 
         # Determine how many neighbors to use for weighting in the KNN classifier
-        if nNeighbors is None:
-            nNeighbors = int(round(math.sqrt(len(X))))
-            if verbose:
-                print("Chose nNeighbors automatically:", nNeighbors)
+        if n_neighbors is None:
+            n_neighbors = int(round(math.sqrt(len(X))))
+            if _verbose:
+                print("Chose n_neighbors automatically:", n_neighbors)
 
         # Create and train the KNN classifier
-        knnClf = neighbors.KNeighborsClassifier(n_neighbors=nNeighbors, algorithm=knnAlgo, weights='distance')
-        knnClf.fit(X, y)
+        trained_knn_clf = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors, algorithm=_knn_algo, weights='distance')
+        trained_knn_clf.fit(X, y)
 
         # Save the trained KNN classifier
-        if modelSavePath is not None:
-            with open(modelSavePath, 'wb') as f:
-                pickle.dump(knnClf, f)
+        if model_save_path is not None:
+            with open(model_save_path, 'wb') as f:
+                pickle.dump(trained_knn_clf, f)
                 print("[INFO] Training completed! Classifier saved!")

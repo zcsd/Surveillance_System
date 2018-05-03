@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # Office surveillance system
 
 '''
@@ -32,8 +33,8 @@ import time
 import cv2
 
 # Camera resolution setting
-frameWidth = 320
-frameHeight = 240
+FRAME_WIDTH = 320
+FRAME_HEIGHT = 240
 
 # Construct the argument parser
 ap = argparse.ArgumentParser()
@@ -42,104 +43,104 @@ ap.add_argument("-c", "--collect_faces", help="collect faces images for saving a
 args = ap.parse_args()
 
 if args.train:
-	print("[INFO] Training KNN classifier...")
-	knnclassifierTrain = KnnClassifierTrain()
-	knnclassifierTrain.train(trainDir="faces/train", modelSavePath="classifier/trained_knn_model.clf", nNeighbors=None)
-	exit()
+    print("[INFO] Training KNN classifier...")
+    knn_classifier_train = KnnClassifierTrain()
+    knn_classifier_train.train(train_dir="faces/train", model_save_path="classifier/trained_knn_model.clf", n_neighbors=None)
+    exit()
 elif args.collect_faces:
-	print("[INFO] Start to collect face images...")
-	call(["python3", "face_collector.py"])
-	print("[INFO] Collection Done.")
-	exit()
+    print("[INFO] Start to collect face images...")
+    call(["python3", "face_collector.py"])
+    print("[INFO] Collection Done.")
+    exit()
 
 # Start camera videostream
 print("[INFO] Starting camera...")
 # 0 for default webcam, 1/2/3... for external webcam
-videoStream = WebcamVideoStream(src=1)
-videoStream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, frameWidth)
-videoStream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, frameHeight)
-videoStream.start()
+video_stream = WebcamVideoStream(src=1)
+video_stream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
+video_stream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
+video_stream.start()
 time.sleep(1.0) # for warm up camera, 1 second
 
 # Initialize motion detector
-motionDetector = MotionDetector()
-noframesRead = 0 # no. of frames read
+motion_detector = MotionDetector()
+num_frame_read = 0 # no. of frames read
 
 # Initialize face detector
-faceDetector = FaceDetector()
+face_detector = FaceDetector()
 
 # Initialize face recognizer and load trained classifier
 with open("classifier/trained_knn_model.clf", 'rb') as f:
-	knnClf = pickle.load(f)
-knnfaceRecognizer = KnnFaceRecognizer()
+    loaded_knn_clf = pickle.load(f)
+knn_face_recognizer = KnnFaceRecognizer()
 
 # FPS calculation
 fps = FPS().start()
 
 while True:
-	# grab frame
-	frame = videoStream.read()
-	frameShow = frame.copy()
-	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	gray = cv2.GaussianBlur(gray, (21, 21), 0)
-	motionLocs = motionDetector.update(gray)
-	# form a nice average before motion detection
-	if noframesRead < 30:
-		noframesRead += 1
-		continue
+    # grab frame
+    frame = video_stream.read()
+    frame_show = frame.copy()
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
+    motion_locs = motion_detector.update(frame_gray)
+    # form a nice average before motion detection
+    if num_frame_read < 30:
+        num_frame_read += 1
+        continue
 
-	if len(motionLocs) > 0:
-		# may consider to process in every other frame to accelerate
-		# !!!!!!!!!!!!!!!!!!!!!
-		faceLocs = faceDetector.detect(frame)
-		if len(faceLocs) > 0:
-			print("[INFO] " + str(len(faceLocs)) + " face found.")
-			# Start face recognition
-			predictions = knnfaceRecognizer.predict(xImg=frame, xFaceLocs=faceLocs, knnClf=knnClf)
-			for name, (top, right, bottom, left) in predictions:
-				print("- Found {} at ({}, {})".format(name, left, top))
-				cv2.rectangle(frameShow, (left, top), (right, bottom), (0, 255, 0), 2)
-				cv2.rectangle(frameShow, (left, bottom), (right, bottom+15), (0, 255, 0), -1)
-				cv2.putText(frameShow, name, (int((right-left)/3)+left,bottom+12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-			'''
-			# Draw green bounding box on faces in frameShow
-			for top, right, bottom, left in faceLocs:
-				# Scale back up face locations
-				top *= 1
-				right *= 1
-				bottom *= 1
-				left *= 1
-				cv2.rectangle(frameShow,(left, top), (right, bottom), (0, 255, 0), 2)
-			'''
-		# initialize the minimum and maximum (x, y)-coordinates
-		(minX, minY) = (np.inf, np.inf)
-		(maxX, maxY) = (-np.inf, -np.inf)
+    if len(motion_locs) > 0:
+        # may consider to process in every other frame to accelerate
+        # @(ZC)
+        known_face_locs = face_detector.detect(frame)
+        if len(known_face_locs) > 0:
+            print("[INFO] " + str(len(known_face_locs)) + " face found.")
+            # Start face recognition
+            predictions = knn_face_recognizer.predict(x_img=frame, x_known_face_locs=known_face_locs, knn_clf=loaded_knn_clf)
+            for name, (top, right, bottom, left) in predictions:
+                print("- Found {} at ({}, {})".format(name, left, top))
+                cv2.rectangle(frame_show, (left, top), (right, bottom), (0, 255, 0), 2)
+                cv2.rectangle(frame_show, (left, bottom), (right, bottom+15), (0, 255, 0), -1)
+                cv2.putText(frame_show, name, (int((right-left)/3)+left,bottom+12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            '''
+            # Draw green bounding box on faces in frame_show
+            for top, right, bottom, left in known_face_locs:
+                # Scale back up face locations
+                top *= 1
+                right *= 1
+                bottom *= 1
+                left *= 1
+                cv2.rectangle(frame_show,(left, top), (right, bottom), (0, 255, 0), 2)
+            '''
+        # initialize the minimum and maximum (x, y)-coordinates
+        (minX, minY) = (np.inf, np.inf)
+        (maxX, maxY) = (-np.inf, -np.inf)
 
-		# loop over the locations of motion and accumulate the
-		# minimum and maximum locations of the bounding boxes
-		for l in motionLocs:
-			(x, y, w, h) = cv2.boundingRect(l)
-			(minX, maxX) = (min(minX, x), max(maxX, x + w))
-			(minY, maxY) = (min(minY, y), max(maxY, y + h))
+        # loop over the locations of motion and accumulate the
+        # minimum and maximum locations of the bounding boxes
+        for l in motion_locs:
+            (x, y, w, h) = cv2.boundingRect(l)
+            (minX, maxX) = (min(minX, x), max(maxX, x + w))
+            (minY, maxY) = (min(minY, y), max(maxY, y + h))
 
-		# draw red bounding box on moving body
-		cv2.rectangle(frameShow, (minX, minY), (maxX, maxY), (0, 0, 255), 3)
+        # draw red bounding box on moving body
+        cv2.rectangle(frame_show, (minX, minY), (maxX, maxY), (0, 0, 255), 3)
 
-	timestamp = datetime.datetime.now()
-	ts = timestamp.strftime("%d %b %Y %H:%M:%S")
+    timestamp = datetime.datetime.now()
+    ts = timestamp.strftime("%d %b %Y %H:%M:%S")
 
-	cv2.putText(frameShow, ts, (10, frameShow.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
-	cv2.imshow("Frame", frameShow)
+    cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+    cv2.imshow("Frame", frame_show)
 
-	fps.update()
+    fps.update()
 
-	key = cv2.waitKey(1) & 0xFF
-	if key == ord('q'):
-		break
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
+        break
 
 fps.stop()
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # Clean up and release memory
 cv2.destroyAllWindows()
-videoStream.stop()
+video_stream.stop()
