@@ -17,6 +17,7 @@ python3 surveillance.py -h
 Press 'q' for quit program
 '''
 
+from sql_updater import SqlUpdater
 from motion_detector import MotionDetector
 from face_detector import FaceDetector
 from knn_classifier_train import KnnClassifierTrain
@@ -53,6 +54,13 @@ elif args.collect_faces:
     print("[INFO] Collection Done.")
     exit()
 
+# Declare user info dictionary
+info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
+
+# Declare SqlUpdater and establish connection
+sql_updater = SqlUpdater()
+con, cur = sql_updater.connect()
+
 # Start camera videostream
 print("[INFO] Starting camera...")
 # 0 for default webcam, 1/2/3... for external webcam
@@ -77,6 +85,8 @@ knn_face_recognizer = KnnFaceRecognizer()
 # FPS calculation
 fps = FPS().start()
 
+print("[INFO] Face Recognition is working...")
+
 while True:
     # grab frame
     frame = video_stream.read()
@@ -89,19 +99,26 @@ while True:
         num_frame_read += 1
         continue
 
+    timestamp = datetime.datetime.now()
+    ts = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
     if len(motion_locs) > 0:
         # may consider to process in every other frame to accelerate
         # @(ZC)
         known_face_locs = face_detector.detect(frame)
         if len(known_face_locs) > 0:
-            print("[INFO] " + str(len(known_face_locs)) + " face found.")
+            # print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
             predictions = knn_face_recognizer.predict(x_img=frame, x_known_face_locs=known_face_locs, knn_clf=loaded_knn_clf)
             for name, (top, right, bottom, left) in predictions:
-                print("- Found {} at ({}, {})".format(name, left, top))
+                # print("- Found {} at ({}, {})".format(name, left, top))
                 cv2.rectangle(frame_show, (left, top), (right, bottom), (0, 255, 0), 2)
                 cv2.rectangle(frame_show, (left, bottom), (right, bottom+15), (0, 255, 0), -1)
                 cv2.putText(frame_show, name, (int((right-left)/3)+left,bottom+12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+                info_dict['DATETIME'] = ts
+                info_dict['NAME'] = name
+                info_dict['ACTION'] = 'IN'
+                sql_updater.insert(con, cur, info_dict)
             '''
             # Draw green bounding box on faces in frame_show
             for top, right, bottom, left in known_face_locs:
@@ -126,9 +143,6 @@ while True:
         # draw red bounding box on moving body
         cv2.rectangle(frame_show, (minX, minY), (maxX, maxY), (0, 0, 255), 3)
 
-    timestamp = datetime.datetime.now()
-    ts = timestamp.strftime("%d %b %Y %H:%M:%S")
-
     cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
     cv2.imshow("Frame", frame_show)
 
@@ -142,5 +156,6 @@ fps.stop()
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # Clean up and release memory
+sql_updater.close(con)
 cv2.destroyAllWindows()
 video_stream.stop()

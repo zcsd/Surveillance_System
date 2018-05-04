@@ -55,10 +55,10 @@ while True:
         # @ZC
         face_locs = face_detector.detect(frame)
         if len(face_locs) > 0:
-            print("[INFO] "+str(len(face_locs)) + " face found.")
+            # print("[INFO] "+str(len(face_locs)) + " face found.")
             # Save image with faces detected
             timestamp = datetime.datetime.now()
-            ts = timestamp.strftime("%Y%b%d%H%M%S_%f")
+            ts = timestamp.strftime("%Y%m%d%H%M%S_%f")
             image_save_path = "images/" + ts + ".jpg"
             cv2.imwrite(image_save_path, frame)
 
