@@ -2,7 +2,7 @@
 
 ## **Basic Function**
 
-**1. Video Streaming**
+**1. Video Streaming(to do)**
 
 **2. Motion Detection**
 
@@ -48,7 +48,7 @@
 
 - Install Dlib(http://dlib.net/) with Python3 bindings
 
-Install dependancy:
+Install dependancy(pass in Ubuntu 16.04):
 
 ```
 
@@ -72,7 +72,7 @@ sudo apt-get install \
 
     libgraphicsmagick1-dev \
 
-    libatlas-dev \
+    libatlas-dev(change to libatlas-base-dev for Ubuntu 18.04) \
 
     libavcodec-dev \
 
@@ -129,7 +129,34 @@ python3 setup.py install --yes USE_AVX_INSTRUCTIONS --no DLIB_USE_CUDA
 
 At this point, you should be able to run ```python3``` and type ```import dlib``` successfully.
 
-- Install face_
+- Install face_recognition library:
+
+```
+
+pip3 install face_recognition
+
+```
+
+- Install necessary Python libary to import:
+
+```
+
+pip3 install opencv-python
+
+pip3 install pymysql
+
+pip3 install imutils
+
+pip3 install sklearn
+
+pip3 install numpy
+
+```
+
+- Clone source code from SAT GIT REPOSITORY:
+
+Downlad SurveillanceSystem source code from
+http://sat-git.starasiatrading.com/bonobo/Repository
 
 
-*4 May 2018*
+*7 May 2018*

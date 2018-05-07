@@ -64,7 +64,7 @@ con, cur = sql_updater.connect()
 # Start camera videostream
 print("[INFO] Starting camera...")
 # 0 for default webcam, 1/2/3... for external webcam
-video_stream = WebcamVideoStream(src=1)
+video_stream = WebcamVideoStream(src=0)
 video_stream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
 video_stream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
 video_stream.start()

@@ -19,7 +19,8 @@ class FaceDetector:
         # Downsampling image for faster processing
         small_image = cv2.resize(image, (0, 0), fx=self._scale, fy=self._scale)
         # OpenCV color use BGR model; face_recognition use RGB color model
-        rgb_small_image = small_image[:, :, ::-1]
+        rgb_small_image = cv2.cvtColor(small_image , cv2.COLOR_BGR2RGB)
+        # rgb_small_image = small_image[:, :, ::-1]
         # Currently,use default HOG-based(Histogram of Oriented Gradients) model
         # It's a traditional object tracking method, but fairly accurate and fast
         face_locs = fr.face_locations(rgb_small_image)
