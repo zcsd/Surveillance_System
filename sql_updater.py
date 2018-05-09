@@ -59,3 +59,14 @@ class SqlUpdater:
             db_connection.commit()
         except:
             db_connection.rollback()
+
+    def truncate(self, db_connection, db_cursor):
+        # Delete all data in the table
+        # TRUNCATE command will delete all data in the table very quickly
+        sql = "TRUNCATE TABLE TIMELOG"
+        try:
+            db_cursor.execute(sql)
+            db_connection.commit()
+            print("[INFO] Delete all data in table.")
+        except:
+            db_connection.rollback

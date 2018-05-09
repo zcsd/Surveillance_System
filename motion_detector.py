@@ -1,7 +1,7 @@
 # Class MotionDetector
 
 '''
--------------Temporal Difference algorithm---------------
+-------------Frame Differencing algorithm---------------
 Accumulate the weighted average between the current frame
 and the previous frames, then compute the pixel-wise differences
 between the current frame and running average, 

@@ -2,7 +2,7 @@
 
 ## **Basic Function**
 
-**1. Video Streaming(to do)**
+**1. Web Video Streaming(to do)**
 
 **2. Motion Detection**
 
@@ -42,19 +42,19 @@
 
 **Requirements**
 - Python3.3+ (Recommend Python3.6)
-- Ubuntu/Linux
+- Ubuntu(16.04+)/Linux
 
 **Steps:**
 
 - Install Dlib(http://dlib.net/) with Python3 bindings
 
-Install dependancy(pass in Ubuntu 16.04):
+Install dependancy(pass in Linux/Ubuntu):
 
 ```
 
 sudo apt-get update
 
-sudo apt-get install \
+sudo apt-get install python3-pip\
 
     build-essential \
 
@@ -97,6 +97,8 @@ sudo apt-get install \
     zip \
 
 sudo apt-get clean && rm -rf /tmp/* /var/tmp/*
+
+pip3 install setuptools
 
 ```
 
@@ -145,6 +147,8 @@ pip3 install opencv-python
 
 pip3 install pymysql
 
+pip3 install scipy
+
 pip3 install imutils
 
 pip3 install sklearn
@@ -157,6 +161,7 @@ pip3 install numpy
 
 Downlad SurveillanceSystem source code from
 http://sat-git.starasiatrading.com/bonobo/Repository
+
 
 
 *7 May 2018*

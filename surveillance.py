@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # Office surveillance system
+# @ZC zichun.lin@starasiatrading.com
 
 '''
 Normal Usage(surveillance and face recognition): 
@@ -60,19 +61,21 @@ info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
 # Declare SqlUpdater and establish connection
 sql_updater = SqlUpdater()
 con, cur = sql_updater.connect()
+# Delete all data in database table
+# sql_updater.truncate(con, cur)  # Please comment it 
 
 # Start camera videostream
 print("[INFO] Starting camera...")
 # 0 for default webcam, 1/2/3... for external webcam
-video_stream = WebcamVideoStream(src=0)
+video_stream = WebcamVideoStream(src=1)
 video_stream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
 video_stream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
 video_stream.start()
-time.sleep(1.0) # for warm up camera, 1 second
+time.sleep(1.0)  # for warm up camera, 1 second
 
 # Initialize motion detector
 motion_detector = MotionDetector()
-num_frame_read = 0 # no. of frames read
+num_frame_read = 0  # no. of frames read
 
 # Initialize face detector
 face_detector = FaceDetector()
