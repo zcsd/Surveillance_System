@@ -60,7 +60,7 @@ info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
 
 # Declare SqlUpdater and establish connection
 sql_updater = SqlUpdater()
-con, cur = sql_updater.connect()
+sql_connection, sql_cursor = sql_updater.connect()
 # Delete all data in database table
 # sql_updater.truncate(con, cur)  # Please comment it 
 
@@ -121,7 +121,8 @@ while True:
                 info_dict['DATETIME'] = ts
                 info_dict['NAME'] = name
                 info_dict['ACTION'] = 'IN'
-                sql_updater.insert(con, cur, info_dict)
+                if(sql_connection != None):
+                    sql_updater.insert(sql_connection, sql_cursor, info_dict)
             '''
             # Draw green bounding box on faces in frame_show
             for top, right, bottom, left in known_face_locs:
@@ -159,6 +160,7 @@ fps.stop()
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # Clean up and release memory
-sql_updater.close(con)
+if sql_connection != None:
+    sql_updater.close(sql_connection)
 cv2.destroyAllWindows()
 video_stream.stop()
