@@ -163,5 +163,15 @@ Downlad SurveillanceSystem source code from
 http://sat-git.starasiatrading.com/bonobo/Repository
 
 
+## **Future Optimization/Bugs to be fiexed**
 
-*7 May 2018*
+- I/O blocking problem for sql_insert when network connection lose, asynchronous and threading...
+
+- Now the program process every frame with faces and send every frame results to SQL, will only send 1 result for one person in a time range(~2min?)
+
+- One wrong recognition result may cause wrong update, to add continuous/probability checking.
+
+- More face images(how many?) to be trained, better accuracy.
+                                   
+                                     
+* May 10 2018*

@@ -5,7 +5,6 @@ Update information(NAME, DATETIME, ACTION) to office MySQL server.
 '''
 
 import pymysql
-from flask import g
 
 HOST = "172.19.80.25"
 PORT = "3306"  # default port is 3306
@@ -57,7 +56,8 @@ class SqlUpdater:
         sql = "INSERT INTO TIMELOG(NAME, DATETIME, ACTION)\
                VALUES ('{}', '{}', '{}')".\
                format(dict['NAME'], dict['DATETIME'], dict['ACTION'])
-            
+        # print(db_connection.ping())
+        
         try:
             # execute sql
             db_cursor.execute(sql)
@@ -65,7 +65,6 @@ class SqlUpdater:
             db_connection.commit()
         except:
             db_connection.rollback()
-
 
     def truncate(self, db_connection, db_cursor):
         # Delete all data in the table

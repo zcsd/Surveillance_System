@@ -62,7 +62,7 @@ info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
 sql_updater = SqlUpdater()
 sql_connection, sql_cursor = sql_updater.connect()
 # Delete all data in database table
-# sql_updater.truncate(con, cur)  # Please comment it 
+# sql_updater.truncate(sql_connection, sql_cursor)  # Please comment it 
 
 # Start camera videostream
 print("[INFO] Starting camera...")
