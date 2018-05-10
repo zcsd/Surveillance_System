@@ -172,6 +172,7 @@ http://sat-git.starasiatrading.com/bonobo/Repository
 - One wrong recognition result may cause wrong update, to add continuous/probability checking.
 
 - More face images(how many?) to be trained, better accuracy.
-                                   
-                                     
-* May 10 2018*
+
+
+
+*May 10 2018*
