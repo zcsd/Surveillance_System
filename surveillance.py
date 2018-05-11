@@ -149,6 +149,7 @@ while True:
 
     cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
     cv2.imshow("Frame", frame_show)
+    # cv2.imwrite("img.jpg", frame_show)
 
     fps.update()
 
