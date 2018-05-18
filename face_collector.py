@@ -14,6 +14,7 @@ import imutils
 import time
 import cv2
 
+
 # Camera resolution setting
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
@@ -55,7 +56,7 @@ while True:
         # @ZC
         face_locs = face_detector.detect(frame)
         if len(face_locs) > 0:
-            # print("[INFO] "+str(len(face_locs)) + " face found.")
+            # print("[INFO] "+str(len(face_locs)) + " face found.")/home/zichun
             # Save image with faces detected
             timestamp = datetime.datetime.now()
             ts = timestamp.strftime("%Y%m%d%H%M%S_%f")

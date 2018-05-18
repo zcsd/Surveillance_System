@@ -4,12 +4,13 @@
 -------------Frame Differencing algorithm---------------
 Accumulate the weighted average between the current frame
 and the previous frames, then compute the pixel-wise differences
-between the current frame and running average, 
+between the current frame and running average,
 faster algorithm for real time system
 '''
 
 import imutils
 import cv2
+
 
 class MotionDetector:
     def __init__(self, _accum_weight=0.5, _delta_thresh=5, _min_area=1000):

@@ -1,10 +1,11 @@
 # Class SqlUpdater
 
 '''
-Update information(NAME, DATETIME, ACTION) to office MySQL server. 
+Update information(NAME, DATETIME, ACTION) to office MySQL server.
 '''
 
 import pymysql
+
 
 HOST = "172.19.80.25"
 PORT = "3306"  # default port is 3306
@@ -45,7 +46,7 @@ class SqlUpdater:
             print("[INFO] MySQL Server Connected! Version: %s " % sql_version)
         except Exception as e:
             print(e)
-        
+
         return connection, cursor
 
     def close(self, db_connection):
@@ -57,7 +58,7 @@ class SqlUpdater:
                VALUES ('{}', '{}', '{}')".\
                format(dict['NAME'], dict['DATETIME'], dict['ACTION'])
         # print(db_connection.ping())
-        
+
         try:
             # execute sql
             db_cursor.execute(sql)

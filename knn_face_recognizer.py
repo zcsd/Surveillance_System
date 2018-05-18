@@ -7,6 +7,7 @@ Recognizes faces in given image using a trained KNN classifier
 from sklearn import neighbors
 import face_recognition as fr
 
+
 """
 :param knn_clf: a knn classifier object.
 :param _distance_threshold: distance threshold for face classification. the larger it is, the more chance
@@ -37,4 +38,3 @@ class KnnFaceRecognizer:
 
         # Predict classes and remove classifications that aren't within the threshold
         return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(face_encodings), x_known_face_locs, are_matches)]
-        

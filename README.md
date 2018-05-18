@@ -1,4 +1,4 @@
-# **Office Surveillance System** 
+# **Office Surveillance System**
 
 ## **Basic Function**
 
@@ -21,7 +21,7 @@
 **9. Alert(to do)**
 
 **...**
-  
+
 ## **Usage**
 
 **Normal Usage(surveillance and face recognition):**
@@ -41,7 +41,7 @@
 ## **Installation**
 
 **Requirements**
-- Python3.3+ (Recommend Python3.6)
+- Python3.5+ (Recommend Python3.6)
 - Ubuntu(16.04+)/Linux
 
 **Steps:**

@@ -10,9 +10,10 @@ python library based on Dlib
 import face_recognition as fr
 import cv2
 
+
 class FaceDetector:
     def __init__(self, _scale=1):
-        self._scale = _scale 
+        self._scale = _scale
 
     def detect(self, image):
         face_locs = []

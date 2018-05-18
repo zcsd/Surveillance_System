@@ -2,8 +2,8 @@
 
 '''
 ------------------------k-Nearest-Neighbors (KNN) algorithm-------------------------------
-The knn classifier is first trained on a set of labeled faces 
-and can then predict the person in an unknown image by finding 
+The knn classifier is first trained on a set of labeled faces
+and can then predict the person in an unknown image by finding
 the k most similar faces (images with closet face-features under eucledian distance)
 in its training set, and performing a majority vote (possibly weighted) on their label.
 For example, if k=3, and the three closest face images to the given image in the
@@ -17,6 +17,7 @@ import os.path
 import pickle
 import math
 import face_recognition as fr
+
 
 """
 :param train_dir: directory that contains a sub-directory for each known person, with its name.
