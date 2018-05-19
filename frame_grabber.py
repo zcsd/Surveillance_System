@@ -12,16 +12,19 @@ FRAME_HEIGHT = 240
 
 class FrameGrabber:
     def __init__(self, src_from_rtsp):
+        # src_from_rtsp is bool 0(from webcam) or 1(from rtsp)
         self.src_from_rtsp = src_from_rtsp
 
         if self.src_from_rtsp:
             self.source = RTSP_URL
         else:
-            self.source = 1
+            # stream from webcam, 0,1,2...represnt different webcam
+            self.source = 0
 
         self.video_stream = None
 
     def start(self):
+        print("[INFO] Starting Video Stream...")
         if self.src_from_rtsp:
             self.video_stream = WebcamVideoStream(self.source)
         else:
@@ -36,10 +39,12 @@ class FrameGrabber:
         raw_frame = self.video_stream.read()
 
         if self.src_from_rtsp:
-            frame = imutils.resize(raw_frame, width=FRAME_WIDTH, height=FRAME_HEIGHT)
-            return frame
+            # Return same-sized frame for both rtsp and webcam
+            resized_frame = imutils.resize(raw_frame, width=FRAME_WIDTH, height=FRAME_HEIGHT)
+            return resized_frame
         else:
             return raw_frame
 
     def stop(self):
         self.video_stream.stop()
+        print("[INFO] Stream Closed. ")

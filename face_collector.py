@@ -6,27 +6,15 @@ This class is for collecting face images to do training and saving.
 
 from motion_detector import MotionDetector
 from face_detector import FaceDetector
-from imutils.video import WebcamVideoStream
+from frame_grabber import FrameGrabber
 from imutils.video import FPS
 import numpy as np
 import datetime
-import imutils
-import time
 import cv2
 
-
-# Camera resolution setting
-FRAME_WIDTH = 640
-FRAME_HEIGHT = 480
-
-# Start camera videostream
-print("[INFO] starting camera...")
-# 0 for default webcam, 1/2/3... for external webcam
-video_stream = WebcamVideoStream(src=1)
-video_stream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
-video_stream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
-video_stream.start()
-time.sleep(1.0) # for warm up camera, 1 second
+# Start videostream, 0 for webcam, 1 for rtsp
+frame_grabber = FrameGrabber(0)
+frame_grabber.start()
 
 # Initialize motion detector
 motion_detector = MotionDetector()
@@ -38,9 +26,11 @@ face_detector = FaceDetector()
 # FPS calculation
 fps = FPS().start()
 
+print("[INFO] Start collecting face images.")
+
 while True:
     # grab frame
-    frame = video_stream.read()
+    frame = frame_grabber.read()
     frame_show = frame.copy()
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
@@ -94,8 +84,9 @@ while True:
         break
 
 fps.stop()
+print("[INFO] Collection Done.")
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # Clean up and release memory
 cv2.destroyAllWindows()
-video_stream.stop()
+frame_grabber.stop()

@@ -38,30 +38,33 @@ import face_recognition as fr
 :param _verbose: verbosity of training
 """
 
+TRAIN_DATA_PATH = "faces/train"
+MODEL_SAVE_PATH = "classifier/trained_knn_model.clf"
+
 class KnnClassifierTrain:
-    def __init__(self, _knn_algo='ball_tree', _verbose = False):
+    def __init__(self, _knn_algo='ball_tree', _verbose = False, _n_neighbors = None):
         self._knn_algo = _knn_algo
         self._verbose = _verbose
+        self._n_neighbors = _n_neighbors
 
-    def train(self, train_dir, model_save_path, n_neighbors):
-        _knn_algo = self._knn_algo
-        _verbose = self._verbose
+    def train(self):
+        print("[INFO] Training KNN classifier...")
         X = []
         y = []
 
         # Loop through each person in the training set
-        for class_dir in os.listdir(train_dir):
-            if not os.path.isdir(os.path.join(train_dir, class_dir)):
+        for class_dir in os.listdir(TRAIN_DATA_PATH):
+            if not os.path.isdir(os.path.join(TRAIN_DATA_PATH, class_dir)):
                 continue
 
             # Loop through each training image for the current person
-            for image_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
+            for image_path in image_files_in_folder(os.path.join(TRAIN_DATA_PATH, class_dir)):
                 image = fr.load_image_file(image_path)
                 faces_boxes = fr.face_locations(image)
 
                 if len(faces_boxes) != 1:
                     # If there are no people (or too many people) in a training image, skip the image.
-                    if _verbose:
+                    if self._verbose:
                         print("Image {} not suitable for training: {}".format(image_path, "Didn't find a face" if len(faces_boxes) < 1 else "Found more than one face"))
                 else:
                     # Add face encoding for current image to the training set
@@ -69,17 +72,17 @@ class KnnClassifierTrain:
                     y.append(class_dir)
 
         # Determine how many neighbors to use for weighting in the KNN classifier
-        if n_neighbors is None:
-            n_neighbors = int(round(math.sqrt(len(X))))
-            if _verbose:
-                print("Chose n_neighbors automatically:", n_neighbors)
+        if self._n_neighbors is None:
+            self._n_neighbors = int(round(math.sqrt(len(X))))
+            if self._verbose:
+                print("Chose n_neighbors automatically:", self._n_neighbors)
 
         # Create and train the KNN classifier
-        trained_knn_clf = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors, algorithm=_knn_algo, weights='distance')
+        trained_knn_clf = neighbors.KNeighborsClassifier(n_neighbors=self._n_neighbors, algorithm=self._knn_algo, weights='distance')
         trained_knn_clf.fit(X, y)
 
         # Save the trained KNN classifier
-        if model_save_path is not None:
-            with open(model_save_path, 'wb') as f:
+        if MODEL_SAVE_PATH is not None:
+            with open(MODEL_SAVE_PATH, 'wb') as f:
                 pickle.dump(trained_knn_clf, f)
                 print("[INFO] Training completed! Classifier saved!")

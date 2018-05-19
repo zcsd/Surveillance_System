@@ -25,19 +25,14 @@ from face_detector import FaceDetector
 from knn_classifier_train import KnnClassifierTrain
 from knn_face_recognizer import KnnFaceRecognizer
 from frame_grabber import FrameGrabber
-from imutils.video import WebcamVideoStream
 from imutils.video import FPS
-import imutils
 import cv2
 import numpy as np
 from subprocess import call
 from threading import Thread, Lock
 from queue import Queue
-import pickle
 import argparse
 import datetime
-import time
-
 
 # Construct the argument parser
 ap = argparse.ArgumentParser()
@@ -48,15 +43,11 @@ ap.add_argument("-c", "--collect_faces", help="collect faces images",
 args = ap.parse_args()
 
 if args.train:
-    print("[INFO] Training KNN classifier...")
     knn_classifier_train = KnnClassifierTrain()
-    knn_classifier_train.train(train_dir="faces/train",
-            model_save_path="classifier/trained_knn_model.clf",n_neighbors=None)
+    knn_classifier_train.train()
     exit()
 elif args.collect_faces:
-    print("[INFO] Start to collect face images...")
     call(["python3", "face_collector.py"])
-    print("[INFO] Collection Done.")
     exit()
 
 # Declare user info dictionary
@@ -68,9 +59,8 @@ sql_connection, sql_cursor = sql_updater.connect()
 # Delete all data in database table
 # sql_updater.truncate(sql_connection, sql_cursor)  # Please comment it
 
-print("[INFO] Starting camera...")
 # Start videostream, 0 for webcam, 1 for rtsp
-frame_grabber = FrameGrabber(1)
+frame_grabber = FrameGrabber(0)
 frame_grabber.start()
 
 # Initialize motion detector
@@ -79,15 +69,11 @@ num_frame_read = 0  # no. of frames read
 
 # Initialize face detector
 face_detector = FaceDetector()
-# Initialize face recognizer and load trained classifier
-with open("classifier/trained_knn_model.clf", 'rb') as f:
-    loaded_knn_clf = pickle.load(f)
+# Initialize face recognizer
 knn_face_recognizer = KnnFaceRecognizer()
 
 # FPS calculation
 fps = FPS().start()
-
-print("[INFO] Face Recognition is working...")
 
 while True:
     # grab frame
@@ -112,7 +98,7 @@ while True:
             # print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
             predictions = knn_face_recognizer.predict(x_img=frame,
-                    x_known_face_locs=known_face_locs, knn_clf=loaded_knn_clf)
+                    x_known_face_locs=known_face_locs)
             for name, (top, right, bottom, left) in predictions:
                 # print("- Found {} at ({}, {})".format(name, left, top))
                 cv2.rectangle(frame_show, (left, top), (right, bottom), (0, 255, 0), 2)

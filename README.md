@@ -2,7 +2,7 @@
 
 ## **Basic Function**
 
-**1. Web Video Streaming(to do)**
+**1. Video Streaming(read from RTSP )**
 
 **2. Motion Detection**
 
@@ -175,4 +175,4 @@ http://sat-git.starasiatrading.com/bonobo/Repository
 
 
 
-*May 10 2018*
+*May 18 2018*

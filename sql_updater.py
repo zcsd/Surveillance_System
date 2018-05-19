@@ -22,10 +22,6 @@ class SqlUpdater:
         self._pwd = _pwd
 
     def connect(self, db=None):
-        _host = self._host
-        _user = self._user
-        _pwd = self._pwd
-
         connection = None
         cursor = None
 
@@ -34,7 +30,7 @@ class SqlUpdater:
             db = DB
         try:
             # establish sql database connection
-            connection = pymysql.connect(_host, _user, _pwd, db)
+            connection = pymysql.connect(self._host, self._user, self._pwd, db)
 
             # create a cursor/handler
             cursor = connection.cursor()
