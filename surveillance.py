@@ -33,6 +33,21 @@ from queue import Queue
 import argparse
 import datetime
 
+# Write timelog information to text file if sql connection fail
+def backup_to_timelog(q):
+    seq_list = []
+    # put all information in queue to a list
+    for i in range(q.qsize()):
+        dict = q.get()
+        seq = str(dict['NAME']) + "  " + str(dict['DATETIME']) + "  " + str(dict['ACTION']) + "\n"
+        seq_list.append(seq)
+    # write list information to txt file
+    with open('timelog/backup.txt','a') as f:
+        f.writelines(seq_list)
+
+    f.close()
+    print("[INFO] Wrote to backup timelog.")
+
 # Construct the argument parser
 ap = argparse.ArgumentParser()
 ap.add_argument("-t", "--train", help="train a KNN faces classifier",
@@ -112,11 +127,9 @@ while True:
                 info_dict['NAME'] = name
                 info_dict['ACTION'] = 'IN'
                 info_queue.put(info_dict)
-                if info_queue.qsize() >= 100:
-                    with info_queue.mutex:
-                        # Write to File
-                        info_queue.queue.clear()
                 print(info_queue.qsize())
+                if info_queue.qsize() >= 100:
+                    backup_to_timelog(info_queue)
 
                 #if(sql_connection != None):
                     #sql_updater.insert(sql_connection, sql_cursor, info_dict)
