@@ -29,7 +29,6 @@ from imutils.video import FPS
 import cv2
 import numpy as np
 from subprocess import call
-from threading import Thread, Lock
 from queue import Queue
 import argparse
 import datetime
@@ -50,12 +49,15 @@ elif args.collect_faces:
     call(["python3", "face_collector.py"])
     exit()
 
+info_queue = Queue(100)
+sql_updater = SqlUpdater(info_queue)
+sql_updater.start()
+
 # Declare user info dictionary
 info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
-
 # Declare SqlUpdater and establish connection
-sql_updater = SqlUpdater()
-sql_connection, sql_cursor = sql_updater.connect()
+#sql_updater = SqlUpdater()
+#sql_connection, sql_cursor = sql_updater.connect()
 # Delete all data in database table
 # sql_updater.truncate(sql_connection, sql_cursor)  # Please comment it
 
@@ -78,6 +80,7 @@ fps = FPS().start()
 while True:
     # grab frame
     frame = frame_grabber.read()
+
     frame_show = frame.copy()
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
@@ -108,8 +111,15 @@ while True:
                 info_dict['DATETIME'] = ts
                 info_dict['NAME'] = name
                 info_dict['ACTION'] = 'IN'
-                if(sql_connection != None):
-                    sql_updater.insert(sql_connection, sql_cursor, info_dict)
+                info_queue.put(info_dict)
+                if info_queue.qsize() >= 100:
+                    with info_queue.mutex:
+                        # Write to File
+                        info_queue.queue.clear()
+                print(info_queue.qsize())
+
+                #if(sql_connection != None):
+                    #sql_updater.insert(sql_connection, sql_cursor, info_dict)
             '''
             # Draw green bounding box on faces in frame_show
             for top, right, bottom, left in known_face_locs:
@@ -149,7 +159,9 @@ fps.stop()
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # Clean up and release memory
-if sql_connection != None:
-    sql_updater.close(sql_connection)
-cv2.destroyAllWindows()
+#if sql_connection != None:
+    #sql_updater.close(sql_connection)
 frame_grabber.stop()
+cv2.destroyAllWindows()
+sql_updater.close()
+sql_updater.join()
