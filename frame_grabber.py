@@ -19,7 +19,7 @@ class FrameGrabber:
             self.source = RTSP_URL
         else:
             # stream from webcam, 0,1,2...represnt different webcam
-            self.source = 0
+            self.source = 1
 
         self.video_stream = None
 

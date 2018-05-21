@@ -8,7 +8,6 @@ from motion_detector import MotionDetector
 from face_detector import FaceDetector
 from frame_grabber import FrameGrabber
 from imutils.video import FPS
-import numpy as np
 import datetime
 import cv2
 
@@ -49,7 +48,7 @@ while True:
             # print("[INFO] "+str(len(face_locs)) + " face found.")/home/zichun
             # Save image with faces detected
             timestamp = datetime.datetime.now()
-            ts = timestamp.strftime("%Y%m%d%H%M%S_%f")
+            ts = timestamp.strftime("%Y-%m-%d_%H:%M:%S_%f")
             image_save_path = "images/" + ts + ".jpg"
             cv2.imwrite(image_save_path, frame)
 
@@ -62,8 +61,8 @@ while True:
                 cv2.rectangle(frame_show,(left, top), (right, bottom), (0, 255, 0), 2)
 
         # initialize the minimum and maximum (x, y)-coordinates
-        (minX, minY) = (np.inf, np.inf)
-        (maxX, maxY) = (-np.inf, -np.inf)
+        (minX, minY) = (999999, 999999)
+        (maxX, maxY) = (-999999, -999999)
 
         # loop over the locations of motion and accumulate the
         # minimum and maximum locations of the bounding boxes

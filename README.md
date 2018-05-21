@@ -2,7 +2,7 @@
 
 ## **Basic Function**
 
-**1. Video Streaming(read from RTSP )**
+**1. Video Streaming(read from RTSP)**
 
 **2. Motion Detection**
 
@@ -43,6 +43,7 @@
 **Requirements**
 - Python3.5+ (Recommend Python3.6)
 - Ubuntu(16.04+)/Linux
+- Recommend to install python3 library bindings in python3 virtualenv(Ref: https://gist.github.com/Geoyi/d9fab4f609e9f75941946be45000632b)
 
 **Steps:**
 
@@ -165,7 +166,7 @@ http://sat-git.starasiatrading.com/bonobo/Repository
 
 ## **Future Optimization/Bugs to be fiexed**
 
-- I/O blocking problem for sql_insert when network connection lose, asynchronous and threading...
+- ~~I/O blocking problem for sql_insert when network connection lose, asynchronous and threading...~~
 
 - Now the program process every frame with faces and send every frame results to SQL, will only send 1 result for one person in a time range(~2min?)
 
@@ -175,4 +176,4 @@ http://sat-git.starasiatrading.com/bonobo/Repository
 
 
 
-*May 18 2018*
+*May 21 2018*

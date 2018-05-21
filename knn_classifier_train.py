@@ -18,7 +18,6 @@ import pickle
 import math
 import face_recognition as fr
 
-
 """
 :param train_dir: directory that contains a sub-directory for each known person, with its name.
  Structure:

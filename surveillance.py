@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # Python 3.5+
-# Office surveillance system
+# SAT Office surveillance system
 # @ZC zichun.lin@starasiatrading.com
 
 '''
@@ -27,7 +27,6 @@ from knn_face_recognizer import KnnFaceRecognizer
 from frame_grabber import FrameGrabber
 from imutils.video import FPS
 import cv2
-import numpy as np
 from subprocess import call
 from queue import Queue
 import argparse
@@ -64,17 +63,13 @@ elif args.collect_faces:
     call(["python3", "face_collector.py"])
     exit()
 
-info_queue = Queue(100)
+# create sql thread
+info_queue = Queue(100)  # max size of q is 100
 sql_updater = SqlUpdater(info_queue)
 sql_updater.start()
 
 # Declare user info dictionary
 info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
-# Declare SqlUpdater and establish connection
-#sql_updater = SqlUpdater()
-#sql_connection, sql_cursor = sql_updater.connect()
-# Delete all data in database table
-# sql_updater.truncate(sql_connection, sql_cursor)  # Please comment it
 
 # Start videostream, 0 for webcam, 1 for rtsp
 frame_grabber = FrameGrabber(0)
@@ -95,7 +90,6 @@ fps = FPS().start()
 while True:
     # grab frame
     frame = frame_grabber.read()
-
     frame_show = frame.copy()
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
@@ -125,14 +119,12 @@ while True:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
                 info_dict['DATETIME'] = ts
                 info_dict['NAME'] = name
-                info_dict['ACTION'] = 'IN'
+                info_dict['ACTION'] = 'NA'
                 info_queue.put(info_dict)
-                print(info_queue.qsize())
+                # print(info_queue.qsize())
                 if info_queue.qsize() >= 100:
                     backup_to_timelog(info_queue)
 
-                #if(sql_connection != None):
-                    #sql_updater.insert(sql_connection, sql_cursor, info_dict)
             '''
             # Draw green bounding box on faces in frame_show
             for top, right, bottom, left in known_face_locs:
@@ -144,8 +136,8 @@ while True:
                 cv2.rectangle(frame_show,(left, top), (right, bottom), (0, 255, 0), 2)
             '''
         # initialize the minimum and maximum (x, y)-coordinates
-        (minX, minY) = (np.inf, np.inf)
-        (maxX, maxY) = (-np.inf, -np.inf)
+        (minX, minY) = (999999, 999999)
+        (maxX, maxY) = (-999999, -999999)
 
         # loop over the locations of motion and accumulate the
         # minimum and maximum locations of the bounding boxes
@@ -172,9 +164,7 @@ fps.stop()
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # Clean up and release memory
-#if sql_connection != None:
-    #sql_updater.close(sql_connection)
-frame_grabber.stop()
-cv2.destroyAllWindows()
 sql_updater.close()
 sql_updater.join()
+frame_grabber.stop()
+cv2.destroyAllWindows()
