@@ -7,6 +7,7 @@ Recognizes faces in given image using a trained KNN classifier
 from sklearn import neighbors
 import face_recognition as fr
 import pickle
+import cv2
 
 """
 :param knn_clf: a knn classifier object.

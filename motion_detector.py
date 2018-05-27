@@ -12,7 +12,7 @@ import imutils
 import cv2
 
 class MotionDetector:
-    def __init__(self, _accum_weight=0.5, _delta_thresh=5, _min_area=1000):
+    def __init__(self, _accum_weight=0.5, _delta_thresh=5, _min_area=800):
         self.isv2 = imutils.is_cv2() # determine the OpenCV version
         self._accum_weight = _accum_weight # the frame accumulation weight
         self._delta_thresh = _delta_thresh # fixed threshold for the delta image

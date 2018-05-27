@@ -59,7 +59,7 @@ class KnnClassifierTrain:
             # Loop through each training image for the current person
             for image_path in image_files_in_folder(os.path.join(TRAIN_DATA_PATH, class_dir)):
                 image = fr.load_image_file(image_path)
-                faces_boxes = fr.face_locations(image)
+                faces_boxes = fr.face_locations(image, number_of_times_to_upsample=2)
 
                 if len(faces_boxes) != 1:
                     # If there are no people (or too many people) in a training image, skip the image.

@@ -1,4 +1,4 @@
-# **Office Surveillance System**
+# **SAT Office Surveillance System**
 
 ## **Basic Function**
 
@@ -16,9 +16,9 @@
 
 **7. Update MySQL Server with(NAME, DATETIME, ACTION)**
 
-**8. Communicate with other hosts(to do)**
+**8. Save Key Video Clip to file (with Pre-Recording)**
 
-**9. Alert(to do)**
+**9. Communicate with other hosts(to do)**
 
 **...**
 
@@ -166,7 +166,7 @@ http://sat-git.starasiatrading.com/bonobo/Repository
 
 ## **Future Optimization/Bugs to be fiexed**
 
-- ~~I/O blocking problem for sql_insert when network connection lose, asynchronous and threading...~~
+- Reconnect SQL server if networt revover.
 
 - Now the program process every frame with faces and send every frame results to SQL, will only send 1 result for one person in a time range(~2min?)
 
@@ -176,4 +176,4 @@ http://sat-git.starasiatrading.com/bonobo/Repository
 
 
 
-*May 21 2018*
+*May 25 2018*

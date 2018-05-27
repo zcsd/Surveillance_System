@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Python 3.5+
 # SAT Office surveillance system
-# @ZC zichun.lin@starasiatrading.com
+# Author: zichun.lin@starasiatrading.com
 
 '''
 Normal Usage(surveillance and face recognition):
@@ -19,6 +19,7 @@ python3 surveillance.py -h
 Press 'q' for quit program
 '''
 
+from key_video_writer import KeyVideoWriter
 from sql_updater import SqlUpdater
 from motion_detector import MotionDetector
 from face_detector import FaceDetector
@@ -31,6 +32,9 @@ from subprocess import call
 from queue import Queue
 import argparse
 import datetime
+
+# True for showing video GUI, change to false on server OS
+SHOW_GUI = True
 
 # Write timelog information to text file if sql connection fail
 def backup_to_timelog(q):
@@ -63,6 +67,11 @@ elif args.collect_faces:
     call(["python3", "face_collector.py"])
     exit()
 
+# initialize key video writer and the consecutive number of
+# frames that have NOT contained any action
+key_video_writer = KeyVideoWriter()
+num_consec_frames = 0
+
 # create sql thread
 info_queue = Queue(100)  # max size of q is 100
 sql_updater = SqlUpdater(info_queue)
@@ -94,8 +103,13 @@ while True:
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
     motion_locs = motion_detector.update(frame_gray)
+
+    # boolean used to indicate if the consecutive frames
+    # counter should be updated
+    update_consec_frames = True
+
     # form a nice average before motion detection
-    if num_frame_read < 30:
+    if num_frame_read < 15:
         num_frame_read += 1
         continue
 
@@ -103,14 +117,31 @@ while True:
     ts = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
     if len(motion_locs) > 0:
-        # may consider to process in every other frame to accelerate
-        # @(ZC)
-        known_face_locs = face_detector.detect(frame)
+        # initialize the minimum and maximum (x, y)-coordinates
+        (minX, minY) = (999999, 999999)
+        (maxX, maxY) = (-999999, -999999)
+
+        # loop over the locations of motion and accumulate the
+        # minimum and maximum locations of the bounding boxes
+        for l in motion_locs:
+            (x, y, w, h) = cv2.boundingRect(l)
+            (minX, maxX) = (min(minX, x), max(maxX, x + w))
+            (minY, maxY) = (min(minY, y), max(maxY, y + h))
+
+        known_face_locs = face_detector.detect(frame, motion_locs)
+
         if len(known_face_locs) > 0:
-            # print("[INFO] " + str(len(known_face_locs)) + " face found.")
+            # reset the number of consecutive frames with NO action to zero
+            update_consec_frames = False
+            num_consec_frames = 0
+
+            # if we are not already recording, start recording
+            if not key_video_writer.recording:
+                video_save_path = "{}/{}.avi".format("videos",ts)
+                key_video_writer.start(video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 60)
+            #print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
-            predictions = knn_face_recognizer.predict(x_img=frame,
-                    x_known_face_locs=known_face_locs)
+            predictions = knn_face_recognizer.predict(x_img=frame, x_known_face_locs=known_face_locs)
             for name, (top, right, bottom, left) in predictions:
                 # print("- Found {} at ({}, {})".format(name, left, top))
                 cv2.rectangle(frame_show, (left, top), (right, bottom), (0, 255, 0), 2)
@@ -125,34 +156,29 @@ while True:
                 if info_queue.qsize() >= 100:
                     backup_to_timelog(info_queue)
 
-            '''
-            # Draw green bounding box on faces in frame_show
-            for top, right, bottom, left in known_face_locs:
-                # Scale back up face locations
-                top *= 1
-                right *= 1
-                bottom *= 1
-                left *= 1
-                cv2.rectangle(frame_show,(left, top), (right, bottom), (0, 255, 0), 2)
-            '''
-        # initialize the minimum and maximum (x, y)-coordinates
-        (minX, minY) = (999999, 999999)
-        (maxX, maxY) = (-999999, -999999)
-
-        # loop over the locations of motion and accumulate the
-        # minimum and maximum locations of the bounding boxes
-        for l in motion_locs:
-            (x, y, w, h) = cv2.boundingRect(l)
-            (minX, maxX) = (min(minX, x), max(maxX, x + w))
-            (minY, maxY) = (min(minY, y), max(maxY, y + h))
-
         # draw red bounding box on moving body
         cv2.rectangle(frame_show, (minX, minY), (maxX, maxY), (0, 0, 255), 3)
 
+    if update_consec_frames:
+        num_consec_frames += 1
+
     cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
-    cv2.imshow("Frame", frame_show)
-    # cv2.imwrite("img.jpg", frame_show)
+
+    # update the key frame video buffer
+    key_video_writer.update(frame_show)
+
+    # if we are recording and reached a threshold on consecutive
+    # number of frames with no action, stop recording the clip
+
+    if key_video_writer.recording and num_consec_frames == 64:
+        key_video_writer.finish()
+
+    if num_consec_frames > 64:
+        num_consec_frames = 64
+
+    if SHOW_GUI:
+        cv2.imshow("Frame", frame_show)
 
     fps.update()
 
@@ -162,6 +188,10 @@ while True:
 
 fps.stop()
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+
+# if we are in the middle of recording a video, wrap it up
+if key_video_writer.recording:
+    key_video_writer.finish()
 
 # Clean up and release memory
 sql_updater.close()

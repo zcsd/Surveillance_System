@@ -43,7 +43,7 @@ while True:
     if len(motion_locs) > 0:
         # may consider to process in every other frame to accelerate
         # @ZC
-        face_locs = face_detector.detect(frame)
+        face_locs = face_detector.detect(frame, motion_locs)
         if len(face_locs) > 0:
             # print("[INFO] "+str(len(face_locs)) + " face found.")/home/zichun
             # Save image with faces detected
