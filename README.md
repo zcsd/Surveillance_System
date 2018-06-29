@@ -1,4 +1,4 @@
-# **SAT Office Surveillance System**
+# **Surveillance System**
 
 ## **Basic Function**
 
@@ -157,11 +157,6 @@ pip3 install sklearn
 pip3 install numpy
 
 ```
-
-- Clone source code from SAT GIT REPOSITORY:
-
-Downlad SurveillanceSystem source code from
-http://sat-git.starasiatrading.com/bonobo/Repository
 
 
 ## **Future Optimization/Bugs to be fiexed**

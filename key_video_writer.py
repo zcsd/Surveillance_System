@@ -14,7 +14,7 @@ import time
 import cv2
 
 class KeyVideoWriter:
-	def __init__(self, buffer_size=64, timeout=1.0):
+	def __init__(self, buffer_size=32, timeout=1.0):
 		# store the maximum buffer size of frames to be kept
 		# in memory along with the sleep timeout during threading
 		self.buffer_size = buffer_size

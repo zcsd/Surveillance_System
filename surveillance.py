@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Python 3.5+
-# SAT Office surveillance system
-# Author: zichun.lin@starasiatrading.com
+# Surveillance system
+# Author: @zichun
 
 '''
 Normal Usage(surveillance and face recognition):
@@ -138,7 +138,7 @@ while True:
             # if we are not already recording, start recording
             if not key_video_writer.recording:
                 video_save_path = "{}/{}.avi".format("videos",ts)
-                key_video_writer.start(video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 60)
+                key_video_writer.start(video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 30)
             #print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
             predictions = knn_face_recognizer.predict(x_img=frame, x_known_face_locs=known_face_locs)
@@ -171,11 +171,11 @@ while True:
     # if we are recording and reached a threshold on consecutive
     # number of frames with no action, stop recording the clip
 
-    if key_video_writer.recording and num_consec_frames == 64:
+    if key_video_writer.recording and num_consec_frames == 32:
         key_video_writer.finish()
 
-    if num_consec_frames > 64:
-        num_consec_frames = 64
+    if num_consec_frames > 32:
+        num_consec_frames = 32
 
     if SHOW_GUI:
         cv2.imshow("Frame", frame_show)
