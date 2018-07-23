@@ -81,7 +81,7 @@ sql_updater.start()
 info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
 
 # Start videostream, 0 for webcam, 1 for rtsp
-frame_grabber = FrameGrabber(0)
+frame_grabber = FrameGrabber(1)
 frame_grabber.start()
 
 # Initialize motion detector
@@ -143,7 +143,7 @@ while True:
             # Start face recognition
             predictions = knn_face_recognizer.predict(x_img=frame, x_known_face_locs=known_face_locs)
             for name, (top, right, bottom, left) in predictions:
-                # print("- Found {} at ({}, {})".format(name, left, top))
+                print("- Found {} at ({}, {})".format(name, left, top))
                 cv2.rectangle(frame_show, (left, top), (right, bottom), (0, 255, 0), 2)
                 cv2.rectangle(frame_show, (left, bottom), (right, bottom+15), (0, 255, 0), -1)
                 cv2.putText(frame_show, name, (int((right-left)/3)+left,bottom+12),

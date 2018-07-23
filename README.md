@@ -169,6 +169,8 @@ pip3 install numpy
 
 - More face images(how many?) to be trained, better accuracy.
 
+- Add web UI to access and control
 
 
-*May 25 2018*
+
+*Jul 24 2018*
