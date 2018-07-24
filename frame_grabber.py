@@ -5,7 +5,7 @@ import imutils
 import cv2
 import time
 
-RTSP_URL = "rtsp://admin:admin123@172.19.80.30:554/videoMain"
+RTSP_URL = "rtsp://satcam002:starasia2018@172.19.80.36:554/cam/realmonitor?channel=1&subtype=0"
 # Camera resolution setting
 FRAME_WIDTH = 320
 FRAME_HEIGHT = 240
@@ -37,13 +37,15 @@ class FrameGrabber:
 
     def read(self):
         raw_frame = self.video_stream.read()
-
+        '''
         if self.src_from_rtsp:
             # Return same-sized frame for both rtsp and webcam
             resized_frame = imutils.resize(raw_frame, width=FRAME_WIDTH, height=FRAME_HEIGHT)
             return resized_frame
         else:
             return raw_frame
+        '''
+        return raw_frame
 
     def stop(self):
         self.video_stream.stop()
