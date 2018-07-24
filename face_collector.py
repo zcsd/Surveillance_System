@@ -8,11 +8,19 @@ from motion_detector import MotionDetector
 from face_detector import FaceDetector
 from frame_grabber import FrameGrabber
 from imutils.video import FPS
+import imutils
 import datetime
 import cv2
 
+SHOW_GUI = True
+
+left_offsetX = 900
+right_offsetX = 1600
+up_offsetY = 550
+down_offsetY = 1350
+
 # Start videostream, 0 for webcam, 1 for rtsp
-frame_grabber = FrameGrabber(0)
+frame_grabber = FrameGrabber(1)
 frame_grabber.start()
 
 # Initialize motion detector
@@ -29,28 +37,28 @@ print("[INFO] Start collecting face images.")
 
 while True:
     # grab frame
-    frame = frame_grabber.read()
+    frame = frame_grabber.read() 
     frame_show = frame.copy()
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame_roi = frame[up_offsetY:down_offsetY, left_offsetX:right_offsetX]
+    frame_gray = cv2.cvtColor(frame_roi, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
     motion_locs = motion_detector.update(frame_gray)
 
     # form a nice average before motion detection
-    if num_frame_read < 30:
+    if num_frame_read < 20:
         num_frame_read += 1
         continue
 
     if len(motion_locs) > 0:
-        # may consider to process in every other frame to accelerate
-        # @ZC
-        face_locs = face_detector.detect(frame, motion_locs)
+        # @ZC may consider to process in every other frame to accelerate
+        face_locs = face_detector.detect(frame_roi, motion_locs)
         if len(face_locs) > 0:
-            # print("[INFO] "+str(len(face_locs)) + " face found.")/home/zichun
             # Save image with faces detected
             timestamp = datetime.datetime.now()
             ts = timestamp.strftime("%Y-%m-%d_%H:%M:%S_%f")
+            print("[INFO] "+str(len(face_locs)) + " face found." + ts)
             image_save_path = "images/" + ts + ".jpg"
-            cv2.imwrite(image_save_path, frame)
+            cv2.imwrite(image_save_path, frame_roi)
 
             for top, right, bottom, left in face_locs:
                 # Scale back up face locations
@@ -58,7 +66,8 @@ while True:
                 right *= 1
                 bottom *= 1
                 left *= 1
-                cv2.rectangle(frame_show,(left, top), (right, bottom), (0, 255, 0), 2)
+                # draw the bounding box for faces
+                cv2.rectangle(frame_show,(left+left_offsetX, top+up_offsetY), (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
 
         # initialize the minimum and maximum (x, y)-coordinates
         (minX, minY) = (999999, 999999)
@@ -71,10 +80,14 @@ while True:
             (minX, maxX) = (min(minX, x), max(maxX, x + w))
             (minY, maxY) = (min(minY, y), max(maxY, y + h))
 
-        # draw the bounding box
-        cv2.rectangle(frame_show, (minX, minY), (maxX, maxY),(0, 0, 255), 2)
+        # draw the bounding box for motion
+        cv2.rectangle(frame_show, (minX+left_offsetX, minY+up_offsetY), (maxX+left_offsetX, maxY+up_offsetY),(0, 0, 255), 2)
 
-    cv2.imshow("Frame", frame_show)
+    
+    if SHOW_GUI:
+        cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
+        frame_show = imutils.resize(frame_show, width=1344, height=760)
+        cv2.imshow("Frame", frame_show)
 
     fps.update()
 

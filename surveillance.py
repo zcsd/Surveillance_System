@@ -28,6 +28,7 @@ from knn_face_recognizer import KnnFaceRecognizer
 from frame_grabber import FrameGrabber
 from imutils.video import FPS
 import cv2
+import imutils
 from subprocess import call
 from queue import Queue
 import argparse
@@ -35,6 +36,12 @@ import datetime
 
 # True for showing video GUI, change to false on server OS
 SHOW_GUI = True
+
+# ROI for motion detection and face detection
+left_offsetX = 900
+right_offsetX = 1600
+up_offsetY = 550
+down_offsetY = 1350
 
 # Write timelog information to text file if sql connection fail
 def backup_to_timelog(q):
@@ -100,7 +107,8 @@ while True:
     # grab frame
     frame = frame_grabber.read()
     frame_show = frame.copy()
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame_roi = frame[up_offsetY:down_offsetY, left_offsetX:right_offsetX]
+    frame_gray = cv2.cvtColor(frame_roi, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
     motion_locs = motion_detector.update(frame_gray)
 
@@ -128,7 +136,7 @@ while True:
             (minX, maxX) = (min(minX, x), max(maxX, x + w))
             (minY, maxY) = (min(minY, y), max(maxY, y + h))
 
-        known_face_locs = face_detector.detect(frame, motion_locs)
+        known_face_locs = face_detector.detect(frame_roi, motion_locs)
 
         if len(known_face_locs) > 0:
             # reset the number of consecutive frames with NO action to zero
@@ -138,15 +146,15 @@ while True:
             # if we are not already recording, start recording
             if not key_video_writer.recording:
                 video_save_path = "{}/{}.avi".format("videos",ts)
-                key_video_writer.start(video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 30)
+                key_video_writer.start(video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 10)
             #print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
-            predictions = knn_face_recognizer.predict(x_img=frame, x_known_face_locs=known_face_locs)
+            predictions = knn_face_recognizer.predict(x_img=frame_roi, x_known_face_locs=known_face_locs)
             for name, (top, right, bottom, left) in predictions:
                 print("- Found {} at ({}, {})".format(name, left, top))
-                cv2.rectangle(frame_show, (left, top), (right, bottom), (0, 255, 0), 2)
-                cv2.rectangle(frame_show, (left, bottom), (right, bottom+15), (0, 255, 0), -1)
-                cv2.putText(frame_show, name, (int((right-left)/3)+left,bottom+12),
+                cv2.rectangle(frame_show, (left+left_offsetX, top+up_offsetY), (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
+                cv2.rectangle(frame_show, (left+left_offsetX, bottom+up_offsetY), (right+left_offsetX, bottom+up_offsetY+15), (0, 255, 0), -1)
+                cv2.putText(frame_show, name, (int((right-left)/3)+left+left_offsetX,bottom+up_offsetY+12),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
                 info_dict['DATETIME'] = ts
                 info_dict['NAME'] = name
@@ -157,13 +165,12 @@ while True:
                     backup_to_timelog(info_queue)
 
         # draw red bounding box on moving body
-        cv2.rectangle(frame_show, (minX, minY), (maxX, maxY), (0, 0, 255), 3)
+        cv2.rectangle(frame_show, (minX+left_offsetX, minY+up_offsetY), (maxX+left_offsetX, maxY+up_offsetY), (0, 0, 255), 3)
 
     if update_consec_frames:
         num_consec_frames += 1
 
-    cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+    #cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
 
     # update the key frame video buffer
     key_video_writer.update(frame_show)
@@ -178,6 +185,8 @@ while True:
         num_consec_frames = 32
 
     if SHOW_GUI:
+        cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
+        frame_show = imutils.resize(frame_show, width=1344, height=760)
         cv2.imshow("Frame", frame_show)
 
     fps.update()
