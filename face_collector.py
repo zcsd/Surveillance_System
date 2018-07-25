@@ -45,7 +45,7 @@ while True:
     motion_locs = motion_detector.update(frame_gray)
 
     # form a nice average before motion detection
-    if num_frame_read < 20:
+    if num_frame_read < 15:
         num_frame_read += 1
         continue
 

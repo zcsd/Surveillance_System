@@ -1,9 +1,10 @@
-# Class SqlUpdater, it's a threaded class.
+# Class SqlUpdater, update info to SQL server
 
 '''
 Update information(NAME, DATETIME, ACTION) to office MySQL server.
 '''
 from threading import Thread
+from queue import Queue
 import pymysql
 
 HOST = "172.19.80.25"
@@ -13,13 +14,29 @@ PWD = "1024"
 DB = "office-iot"
 TB = 'TIMELOG'
 
-class SqlUpdater(Thread):
-    def __init__(self, q):
-        Thread.__init__(self)
-        self.info_queue = q
+# Write timelog information to text file if sql connection fail
+def backup_to_timelog(q):
+    seq_list = []
+    # put all information in queue to a list
+    for i in range(q.qsize()):
+        dict = q.get()
+        seq = str(dict['NAME']) + "  " + str(dict['DATETIME']) + "  " + str(dict['ACTION']) + "\n"
+        seq_list.append(seq)
+    # write list information to txt file
+    with open('timelog/backup.txt','a') as f:
+        f.writelines(seq_list)
+
+    f.close()
+    print("[INFO] Wrote to backup timelog.")
+
+class SqlUpdater:
+    def __init__(self):
         self.connection = None
         self.cursor = None
         self.running = False
+
+        self.connect()
+        self.truncate()
 
     def connect(self):
         try:
@@ -32,9 +49,15 @@ class SqlUpdater(Thread):
             self.cursor.execute("SELECT VERSION()")
             # fetch one piece of data
             sql_version = self.cursor.fetchone()
-
-            print("[INFO] MySQL Server Connected! Version: %s " % sql_version)
+            
+            if self.connection == None:
+                print("[INFO] Failed to Connect SQL. ")
+                self.running = False
+            else:
+                self.running = True
+                print("[INFO] MySQL Server Connected! Version: %s " % sql_version)
         except Exception as e:
+            print("[INFO] Failed to Connect SQL. ")
             print(e)
 
     def close(self):
@@ -42,7 +65,6 @@ class SqlUpdater(Thread):
             self.connection.close()
             print("[INFO] MySQL Server Close Safely.")
         self.running = False
-        print("[INFO] SQL Thread Exit.")
 
     def truncate(self):
         # Delete all data in the table
@@ -73,22 +95,3 @@ class SqlUpdater(Thread):
                 f.writelines(seq)
             f.close()
             #self.connection.rollback()
-
-    def run(self):
-        print("[INFO] SQL Thread Created.")
-        self.connect()
-        if self.connection == None:
-            print("[INFO] Failed to Connect SQL. ")
-            self.running = False
-        else:
-            self.running = True
-            # self.truncate()  # Delete all data in database table
-        while self.running:
-            #print(self.info_queue.qsize())
-            if self.info_queue.qsize() == 0:
-                continue
-
-            new_info_dict = self.info_queue.get(True, 3)
-
-            if self.running:
-                self.insert(new_info_dict)

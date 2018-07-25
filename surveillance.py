@@ -30,7 +30,6 @@ from imutils.video import FPS
 import cv2
 import imutils
 from subprocess import call
-from queue import Queue
 import argparse
 import datetime
 
@@ -42,21 +41,6 @@ left_offsetX = 900
 right_offsetX = 1600
 up_offsetY = 550
 down_offsetY = 1350
-
-# Write timelog information to text file if sql connection fail
-def backup_to_timelog(q):
-    seq_list = []
-    # put all information in queue to a list
-    for i in range(q.qsize()):
-        dict = q.get()
-        seq = str(dict['NAME']) + "  " + str(dict['DATETIME']) + "  " + str(dict['ACTION']) + "\n"
-        seq_list.append(seq)
-    # write list information to txt file
-    with open('timelog/backup.txt','a') as f:
-        f.writelines(seq_list)
-
-    f.close()
-    print("[INFO] Wrote to backup timelog.")
 
 # Construct the argument parser
 ap = argparse.ArgumentParser()
@@ -79,10 +63,8 @@ elif args.collect_faces:
 key_video_writer = KeyVideoWriter()
 num_consec_frames = 0
 
-# create sql thread
-info_queue = Queue(100)  # max size of q is 100
-sql_updater = SqlUpdater(info_queue)
-sql_updater.start()
+# Initialize SQL Updater
+sql_updater = SqlUpdater()
 
 # Declare user info dictionary
 info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
@@ -146,12 +128,12 @@ while True:
             # if we are not already recording, start recording
             if not key_video_writer.recording:
                 video_save_path = "{}/{}.avi".format("videos",ts)
-                key_video_writer.start(video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 10)
+                key_video_writer.start(video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 8)
             #print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
             predictions = knn_face_recognizer.predict(x_img=frame_roi, x_known_face_locs=known_face_locs)
             for name, (top, right, bottom, left) in predictions:
-                print("- Found {} at ({}, {})".format(name, left, top))
+                print("- Found {}".format(name))
                 cv2.rectangle(frame_show, (left+left_offsetX, top+up_offsetY), (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
                 cv2.rectangle(frame_show, (left+left_offsetX, bottom+up_offsetY), (right+left_offsetX, bottom+up_offsetY+15), (0, 255, 0), -1)
                 cv2.putText(frame_show, name, (int((right-left)/3)+left+left_offsetX,bottom+up_offsetY+12),
@@ -159,30 +141,27 @@ while True:
                 info_dict['DATETIME'] = ts
                 info_dict['NAME'] = name
                 info_dict['ACTION'] = 'NA'
-                info_queue.put(info_dict)
-                # print(info_queue.qsize())
-                if info_queue.qsize() >= 100:
-                    backup_to_timelog(info_queue)
-
+                
+                sql_updater.insert(info_dict)
+                
         # draw red bounding box on moving body
         cv2.rectangle(frame_show, (minX+left_offsetX, minY+up_offsetY), (maxX+left_offsetX, maxY+up_offsetY), (0, 0, 255), 3)
 
     if update_consec_frames:
         num_consec_frames += 1
 
-    #cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+    # cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
 
     # update the key frame video buffer
     key_video_writer.update(frame_show)
 
     # if we are recording and reached a threshold on consecutive
     # number of frames with no action, stop recording the clip
-
-    if key_video_writer.recording and num_consec_frames == 32:
+    if key_video_writer.recording and num_consec_frames == 15:
         key_video_writer.finish()
 
-    if num_consec_frames > 32:
-        num_consec_frames = 32
+    if num_consec_frames > 15:
+        num_consec_frames = 15
 
     if SHOW_GUI:
         cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
@@ -204,6 +183,5 @@ if key_video_writer.recording:
 
 # Clean up and release memory
 sql_updater.close()
-sql_updater.join()
 frame_grabber.stop()
 cv2.destroyAllWindows()
