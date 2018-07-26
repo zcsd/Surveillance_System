@@ -38,6 +38,11 @@
 
 **Press 'q' for quit program**
 
+**Note on RTSP**
+- IP:172.19.80.36 or sat-cam002
+- admin: starasia2019 (for admin)
+- satcam002: starasia2018 (for stream)
+
 ## **Installation**
 
 **Requirements**

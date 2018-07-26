@@ -146,7 +146,7 @@ while True:
             # Start face recognition
             predictions = knn_face_recognizer.predict(x_img=frame_roi, x_known_face_locs=known_face_locs)
             for name, (top, right, bottom, left) in predictions:
-                print("- Found {}".format(name))
+                print("- Found {} ".format(name) + ts)
                 cv2.rectangle(frame_show, (left+left_offsetX, top+up_offsetY), (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
                 cv2.rectangle(frame_show, (left+left_offsetX, bottom+up_offsetY), (right+left_offsetX, bottom+up_offsetY+15), (0, 255, 0), -1)
                 cv2.putText(frame_show, name, (int((right-left)/3)+left+left_offsetX,bottom+up_offsetY+12),
