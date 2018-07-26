@@ -20,7 +20,7 @@ import cv2
 MODEL_SAVE_PATH = "classifier/trained_knn_model.clf"
 
 class KnnFaceRecognizer:
-    def __init__(self, _distance_threshold=0.5):
+    def __init__(self, _distance_threshold=0.58):
         self._distance_threshold = _distance_threshold
         with open(MODEL_SAVE_PATH, 'rb') as f:
             self.knn_clf = pickle.load(f)

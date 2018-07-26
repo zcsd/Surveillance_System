@@ -35,9 +35,6 @@ class SqlUpdater:
         self.cursor = None
         self.running = False
 
-        self.connect()
-        self.truncate()
-
     def connect(self):
         try:
             # establish sql database connection

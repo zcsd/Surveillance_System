@@ -65,6 +65,10 @@ num_consec_frames = 0
 
 # Initialize SQL Updater
 sql_updater = SqlUpdater()
+try:
+    sql_updater.connect()
+except:
+    print("[INFO] Failed to Connect SQL. ")
 
 # Declare user info dictionary
 info_dict = {'NAME': '', 'DATETIME': '', 'ACTION': ''}
@@ -86,6 +90,15 @@ knn_face_recognizer = KnnFaceRecognizer()
 fps = FPS().start()
 
 while True:
+    
+    if not sql_updater.running:
+        try:
+            sql_updater.connect()
+        except:
+            pass
+        else:
+            print("[INFO] Succeed to Connect SQL. ")
+
     # grab frame
     frame = frame_grabber.read()
     frame_show = frame.copy()
