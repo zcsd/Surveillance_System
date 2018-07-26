@@ -25,7 +25,7 @@ frame_grabber.start()
 
 # Initialize motion detector
 motion_detector = MotionDetector()
-num_frame_read = 0 # no. of frames read
+num_frame_read = 0  # no. of frames read
 
 # Initialize face detector
 face_detector = FaceDetector()
@@ -37,7 +37,7 @@ print("[INFO] Start collecting face images.")
 
 while True:
     # grab frame
-    frame = frame_grabber.read() 
+    frame = frame_grabber.read()
     frame_show = frame.copy()
     frame_roi = frame[up_offsetY:down_offsetY, left_offsetX:right_offsetX]
     frame_gray = cv2.cvtColor(frame_roi, cv2.COLOR_BGR2GRAY)
@@ -67,7 +67,8 @@ while True:
                 bottom *= 1
                 left *= 1
                 # draw the bounding box for faces
-                cv2.rectangle(frame_show,(left+left_offsetX, top+up_offsetY), (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
+                cv2.rectangle(frame_show, (left+left_offsetX, top+up_offsetY),
+                              (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
 
         # initialize the minimum and maximum (x, y)-coordinates
         (minX, minY) = (999999, 999999)
@@ -81,11 +82,12 @@ while True:
             (minY, maxY) = (min(minY, y), max(maxY, y + h))
 
         # draw the bounding box for motion
-        cv2.rectangle(frame_show, (minX+left_offsetX, minY+up_offsetY), (maxX+left_offsetX, maxY+up_offsetY),(0, 0, 255), 2)
+        cv2.rectangle(frame_show, (minX+left_offsetX, minY+up_offsetY),
+                      (maxX+left_offsetX, maxY+up_offsetY), (0, 0, 255), 2)
 
-    
     if SHOW_GUI:
-        cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
+        cv2.rectangle(frame_show, (left_offsetX, up_offsetY),
+                      (right_offsetX, down_offsetY), (0, 0, 0), 2)
         frame_show = imutils.resize(frame_show, width=1344, height=760)
         cv2.imshow("Frame", frame_show)
 

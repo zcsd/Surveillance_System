@@ -10,6 +10,7 @@ RTSP_URL = "rtsp://satcam002:starasia2018@172.19.80.36:554/cam/realmonitor?chann
 FRAME_WIDTH = 320
 FRAME_HEIGHT = 240
 
+
 class FrameGrabber:
     def __init__(self, src_from_rtsp):
         # src_from_rtsp is bool 0(from webcam) or 1(from rtsp)
@@ -30,7 +31,8 @@ class FrameGrabber:
         else:
             self.video_stream = WebcamVideoStream(self.source)
             self.video_stream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
-            self.video_stream.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
+            self.video_stream.stream.set(
+                cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
 
         self.video_stream.start()
         time.sleep(1.0)  # for warm up camera, 1 second

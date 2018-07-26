@@ -20,14 +20,16 @@ def backup_to_timelog(q):
     # put all information in queue to a list
     for i in range(q.qsize()):
         dict = q.get()
-        seq = str(dict['NAME']) + "  " + str(dict['DATETIME']) + "  " + str(dict['ACTION']) + "\n"
+        seq = str(dict['NAME']) + "  " + str(dict['DATETIME']) + \
+            "  " + str(dict['ACTION']) + "\n"
         seq_list.append(seq)
     # write list information to txt file
-    with open('timelog/backup.txt','a') as f:
+    with open('timelog/backup.txt', 'a') as f:
         f.writelines(seq_list)
 
     f.close()
     print("[INFO] Wrote to backup timelog.")
+
 
 class SqlUpdater:
     def __init__(self):
@@ -46,13 +48,14 @@ class SqlUpdater:
             self.cursor.execute("SELECT VERSION()")
             # fetch one piece of data
             sql_version = self.cursor.fetchone()
-            
+
             if self.connection == None:
                 print("[INFO] Failed to Connect SQL. ")
                 self.running = False
             else:
                 self.running = True
-                print("[INFO] MySQL Server Connected! Version: %s " % sql_version)
+                print("[INFO] MySQL Server Connected! Version: %s " %
+                      sql_version)
         except Exception as e:
             print("[INFO] Failed to Connect SQL. ")
             print(e)
@@ -77,7 +80,7 @@ class SqlUpdater:
     def insert(self, dict):
         sql = "INSERT INTO TIMELOG(NAME, DATETIME, ACTION)\
                VALUES ('{}', '{}', '{}')".\
-               format(dict['NAME'], dict['DATETIME'], dict['ACTION'])
+            format(dict['NAME'], dict['DATETIME'], dict['ACTION'])
         # print(self.connection.ping())
 
         try:
@@ -87,8 +90,9 @@ class SqlUpdater:
             self.connection.commit()
         except:
             # Backup to local file if insert failed
-            seq = str(dict['NAME']) + "  " + str(dict['DATETIME']) + "  " + str(dict['ACTION']) + "\n"
-            with open('timelog/backup.txt','a') as f:
+            seq = str(dict['NAME']) + "  " + str(dict['DATETIME']
+                                                 ) + "  " + str(dict['ACTION']) + "\n"
+            with open('timelog/backup.txt', 'a') as f:
                 f.writelines(seq)
             f.close()
-            #self.connection.rollback()
+            # self.connection.rollback()

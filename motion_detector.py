@@ -11,12 +11,13 @@ faster algorithm for real time system
 import imutils
 import cv2
 
+
 class MotionDetector:
     def __init__(self, _accum_weight=0.5, _delta_thresh=5, _min_area=4000):
-        self.isv2 = imutils.is_cv2() # determine the OpenCV version
-        self._accum_weight = _accum_weight # the frame accumulation weight
-        self._delta_thresh = _delta_thresh # fixed threshold for the delta image
-        self._min_area = _min_area # min area for motion detected
+        self.isv2 = imutils.is_cv2()  # determine the OpenCV version
+        self._accum_weight = _accum_weight  # the frame accumulation weight
+        self._delta_thresh = _delta_thresh  # fixed threshold for the delta image
+        self._min_area = _min_area  # min area for motion detected
 
         # initialize the average image for motion detection
         self._avg = None
@@ -34,12 +35,14 @@ class MotionDetector:
         frame_delta = cv2.absdiff(image_gray, cv2.convertScaleAbs(self._avg))
 
         # threshold the delta image and apply dilations
-        image_thresh = cv2.threshold(frame_delta, self._delta_thresh, 255, cv2.THRESH_BINARY)[1]
+        image_thresh = cv2.threshold(
+            frame_delta, self._delta_thresh, 255, cv2.THRESH_BINARY)[1]
         image_thresh = cv2.dilate(image_thresh, None, iterations=2)
         # cv2.imshow("Thresh", image_thresh)
 
         # find contours in the thresholded image
-        cnts = cv2.findContours(image_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = cv2.findContours(
+            image_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if self.isv2 else cnts[1]
 
         # loop over the contours

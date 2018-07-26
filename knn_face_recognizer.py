@@ -19,6 +19,7 @@ import cv2
 
 MODEL_SAVE_PATH = "classifier/trained_knn_model.clf"
 
+
 class KnnFaceRecognizer:
     def __init__(self, _distance_threshold=0.58):
         self._distance_threshold = _distance_threshold
@@ -36,11 +37,14 @@ class KnnFaceRecognizer:
             return []
 
         # Find encodings for faces in the test iamge
-        face_encodings = fr.face_encodings(x_img, known_face_locations=x_known_face_locs)
+        face_encodings = fr.face_encodings(
+            x_img, known_face_locations=x_known_face_locs)
 
         # Use the KNN model to find the best matches for the test face
-        closet_distance = self.knn_clf.kneighbors(face_encodings, n_neighbors=1)
-        are_matches = [closet_distance[0][i][0] <= _distance_threshold for i in range(len(x_known_face_locs))]
+        closet_distance = self.knn_clf.kneighbors(
+            face_encodings, n_neighbors=1)
+        are_matches = [closet_distance[0][i][0] <=
+                       _distance_threshold for i in range(len(x_known_face_locs))]
 
         # Predict classes and remove classifications that aren't within the threshold
         return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(self.knn_clf.predict(face_encodings), x_known_face_locs, are_matches)]

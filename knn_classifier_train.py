@@ -41,8 +41,9 @@ import face_recognition as fr
 TRAIN_DATA_PATH = "faces/train"
 MODEL_SAVE_PATH = "classifier/trained_knn_model.clf"
 
+
 class KnnClassifierTrain:
-    def __init__(self, _knn_algo='ball_tree', _verbose = True, _n_neighbors = 5):
+    def __init__(self, _knn_algo='ball_tree', _verbose=True, _n_neighbors=5):
         self._knn_algo = _knn_algo
         self._verbose = _verbose
         self._n_neighbors = _n_neighbors
@@ -60,15 +61,18 @@ class KnnClassifierTrain:
             # Loop through each training image for the current person
             for image_path in image_files_in_folder(os.path.join(TRAIN_DATA_PATH, class_dir)):
                 image = fr.load_image_file(image_path)
-                faces_boxes = fr.face_locations(image, number_of_times_to_upsample=1)
+                faces_boxes = fr.face_locations(
+                    image, number_of_times_to_upsample=1)
 
                 if len(faces_boxes) != 1:
                     # If there are no people (or too many people) in a training image, skip the image.
                     if self._verbose:
-                        print("Image {} not suitable for training: {}".format(image_path, "Didn't find a face" if len(faces_boxes) < 1 else "Found more than one face"))
+                        print("Image {} not suitable for training: {}".format(
+                            image_path, "Didn't find a face" if len(faces_boxes) < 1 else "Found more than one face"))
                 else:
                     # Add face encoding for current image to the training set
-                    X.append(fr.face_encodings(image, known_face_locations=faces_boxes)[0])
+                    X.append(fr.face_encodings(
+                        image, known_face_locations=faces_boxes)[0])
                     y.append(class_dir)
 
         # Determine how many neighbors to use for weighting in the KNN classifier
@@ -78,9 +82,10 @@ class KnnClassifierTrain:
                 print("Chose n_neighbors automatically:", self._n_neighbors)
 
         # Create and train the KNN classifier
-        trained_knn_clf = neighbors.KNeighborsClassifier(n_neighbors=self._n_neighbors, algorithm=self._knn_algo, weights='distance')
+        trained_knn_clf = neighbors.KNeighborsClassifier(
+            n_neighbors=self._n_neighbors, algorithm=self._knn_algo, weights='distance')
         trained_knn_clf.fit(X, y)
-       
+
         # Save the trained KNN classifier
         if MODEL_SAVE_PATH is not None:
             with open(MODEL_SAVE_PATH, 'wb') as f:

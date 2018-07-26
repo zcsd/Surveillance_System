@@ -90,7 +90,7 @@ knn_face_recognizer = KnnFaceRecognizer()
 fps = FPS().start()
 
 while True:
-    
+
     if not sql_updater.running:
         try:
             sql_updater.connect()
@@ -140,25 +140,30 @@ while True:
 
             # if we are not already recording, start recording
             if not key_video_writer.recording:
-                video_save_path = "{}/{}.avi".format("videos",ts)
-                key_video_writer.start(video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 8)
+                video_save_path = "{}/{}.avi".format("videos", ts)
+                key_video_writer.start(
+                    video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 8)
             #print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
-            predictions = knn_face_recognizer.predict(x_img=frame_roi, x_known_face_locs=known_face_locs)
+            predictions = knn_face_recognizer.predict(
+                x_img=frame_roi, x_known_face_locs=known_face_locs)
             for name, (top, right, bottom, left) in predictions:
                 print("- Found {} ".format(name) + ts)
-                cv2.rectangle(frame_show, (left+left_offsetX, top+up_offsetY), (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
-                cv2.rectangle(frame_show, (left+left_offsetX, bottom+up_offsetY), (right+left_offsetX, bottom+up_offsetY+15), (0, 255, 0), -1)
-                cv2.putText(frame_show, name, (int((right-left)/3)+left+left_offsetX,bottom+up_offsetY+12),
+                cv2.rectangle(frame_show, (left+left_offsetX, top+up_offsetY),
+                              (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
+                cv2.rectangle(frame_show, (left+left_offsetX, bottom+up_offsetY),
+                              (right+left_offsetX, bottom+up_offsetY+15), (0, 255, 0), -1)
+                cv2.putText(frame_show, name, (int((right-left)/3)+left+left_offsetX, bottom+up_offsetY+12),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
                 info_dict['DATETIME'] = ts
                 info_dict['NAME'] = name
                 info_dict['ACTION'] = 'NA'
-                
+
                 sql_updater.insert(info_dict)
-                
+
         # draw red bounding box on moving body
-        cv2.rectangle(frame_show, (minX+left_offsetX, minY+up_offsetY), (maxX+left_offsetX, maxY+up_offsetY), (0, 0, 255), 3)
+        cv2.rectangle(frame_show, (minX+left_offsetX, minY+up_offsetY),
+                      (maxX+left_offsetX, maxY+up_offsetY), (0, 0, 255), 3)
 
     if update_consec_frames:
         num_consec_frames += 1
@@ -177,7 +182,8 @@ while True:
         num_consec_frames = 15
 
     if SHOW_GUI:
-        cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
+        cv2.rectangle(frame_show, (left_offsetX, up_offsetY),
+                      (right_offsetX, down_offsetY), (0, 0, 0), 2)
         frame_show = imutils.resize(frame_show, width=1344, height=760)
         cv2.imshow("Frame", frame_show)
 
