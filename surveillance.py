@@ -117,7 +117,7 @@ while True:
         continue
 
     timestamp = datetime.datetime.now()
-    ts = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    ts = timestamp.strftime("%Y-%m-%d %H:%M:%S_%f")
 
     if len(motion_locs) > 0:
         # initialize the minimum and maximum (x, y)-coordinates
@@ -137,6 +137,9 @@ while True:
             # reset the number of consecutive frames with NO action to zero
             update_consec_frames = False
             num_consec_frames = 0
+
+            image_save_path = "images/" + ts + ".jpg"
+            cv2.imwrite(image_save_path, frame_roi)
 
             # if we are not already recording, start recording
             if not key_video_writer.recording:
