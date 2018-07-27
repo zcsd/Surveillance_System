@@ -38,9 +38,9 @@ SHOW_GUI = True
 
 # ROI for motion detection and face detection
 left_offsetX = 900
-right_offsetX = 1600
-up_offsetY = 550
-down_offsetY = 1350
+right_offsetX = 1500
+up_offsetY = 600
+down_offsetY = 1300
 
 # Construct the argument parser
 ap = argparse.ArgumentParser()
