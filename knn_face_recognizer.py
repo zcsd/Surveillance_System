@@ -17,7 +17,7 @@ import cv2
     For faces of unrecognized persons, the name 'unknown' will be returned.
 """
 
-MODEL_SAVE_PATH = "classifier/trained_knn_model.clf"
+MODEL_SAVE_PATH = "/home/zichun/SurveillanceSystem/classifier/trained_knn_model.clf"
 
 
 class KnnFaceRecognizer:

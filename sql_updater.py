@@ -92,7 +92,7 @@ class SqlUpdater:
             # Backup to local file if insert failed
             seq = str(dict['NAME']) + "  " + str(dict['DATETIME']
                                                  ) + "  " + str(dict['ACTION']) + "\n"
-            with open('timelog/backup.txt', 'a') as f:
+            with open('/home/zichun/SurveillanceSystem/timelog/backup.txt', 'a') as f:
                 f.writelines(seq)
             f.close()
             # self.connection.rollback()

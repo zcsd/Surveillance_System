@@ -117,7 +117,8 @@ while True:
         continue
 
     timestamp = datetime.datetime.now()
-    ts = timestamp.strftime("%Y-%m-%d %H:%M:%S_%f")
+    ts = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    ts1 = timestamp.strftime("%Y-%m-%d %H:%M:%S_%f")
 
     if len(motion_locs) > 0:
         # initialize the minimum and maximum (x, y)-coordinates
@@ -133,19 +134,19 @@ while True:
 
         known_face_locs = face_detector.detect(frame_roi, motion_locs)
 
+        # reset the number of consecutive frames with NO action to zero
+        update_consec_frames = False
+        num_consec_frames = 0
+        # if we are not already recording, start recording
+        if not key_video_writer.recording:
+            video_save_path = "{}/{}.avi".format("/home/zichun/SurveillanceSystem/videos", ts)
+            key_video_writer.start(
+                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 8)
+        
         if len(known_face_locs) > 0:
-            # reset the number of consecutive frames with NO action to zero
-            update_consec_frames = False
-            num_consec_frames = 0
-
-            image_save_path = "images/" + ts + ".jpg"
+            image_save_path = "/home/zichun/SurveillanceSystem/images/" + ts1 + ".jpg"
             cv2.imwrite(image_save_path, frame_roi)
 
-            # if we are not already recording, start recording
-            if not key_video_writer.recording:
-                video_save_path = "{}/{}.avi".format("videos", ts)
-                key_video_writer.start(
-                    video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 8)
             #print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
             predictions = knn_face_recognizer.predict(
@@ -184,9 +185,9 @@ while True:
     if num_consec_frames > 15:
         num_consec_frames = 15
 
+    cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
+    
     if SHOW_GUI:
-        cv2.rectangle(frame_show, (left_offsetX, up_offsetY),
-                      (right_offsetX, down_offsetY), (0, 0, 0), 2)
         frame_show = imutils.resize(frame_show, width=1344, height=760)
         cv2.imshow("Frame", frame_show)
 
