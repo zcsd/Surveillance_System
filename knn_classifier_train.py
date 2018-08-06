@@ -43,7 +43,7 @@ MODEL_SAVE_PATH = "classifier/trained_knn_model.clf"
 
 
 class KnnClassifierTrain:
-    def __init__(self, _knn_algo='ball_tree', _verbose=True, _n_neighbors=5):
+    def __init__(self, _knn_algo='ball_tree', _verbose=True, _n_neighbors=7):
         self._knn_algo = _knn_algo
         self._verbose = _verbose
         self._n_neighbors = _n_neighbors

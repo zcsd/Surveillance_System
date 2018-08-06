@@ -21,7 +21,7 @@ MODEL_SAVE_PATH = "/home/zichun/SurveillanceSystem/classifier/trained_knn_model.
 
 
 class KnnFaceRecognizer:
-    def __init__(self, _distance_threshold=0.58):
+    def __init__(self, _distance_threshold=0.55):
         self._distance_threshold = _distance_threshold
         with open(MODEL_SAVE_PATH, 'rb') as f:
             self.knn_clf = pickle.load(f)
