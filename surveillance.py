@@ -141,7 +141,7 @@ while True:
         if not key_video_writer.recording:
             video_save_path = "{}/{}.avi".format("/home/zichun/SurveillanceSystem/videos", ts)
             key_video_writer.start(
-                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 8)
+                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 10)
         
         if len(known_face_locs) > 0:
             image_save_path = "/home/zichun/SurveillanceSystem/images/" + ts1 + ".jpg"
@@ -173,20 +173,19 @@ while True:
         num_consec_frames += 1
 
     # cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
-
+    cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
+    frame_toVideo = imutils.resize(frame_show, width=1344, height=760)
     # update the key frame video buffer
-    key_video_writer.update(frame_show)
+    key_video_writer.update(frame_toVideo)
 
     # if we are recording and reached a threshold on consecutive
     # number of frames with no action, stop recording the clip
-    if key_video_writer.recording and num_consec_frames == 15:
+    if key_video_writer.recording and num_consec_frames == 30:
         key_video_writer.finish()
 
-    if num_consec_frames > 15:
-        num_consec_frames = 15
+    if num_consec_frames > 30:
+        num_consec_frames = 30
 
-    cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
-    
     if SHOW_GUI:
         frame_show = imutils.resize(frame_show, width=1344, height=760)
         cv2.imshow("Frame", frame_show)
