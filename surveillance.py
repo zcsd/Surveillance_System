@@ -132,7 +132,7 @@ while True:
             (minX, maxX) = (min(minX, x), max(maxX, x + w))
             (minY, maxY) = (min(minY, y), max(maxY, y + h))
 
-        known_face_locs = face_detector.detect(frame_roi, motion_locs)
+        known_face_locs = face_detector.detect(frame_roi)
 
         # reset the number of consecutive frames with NO action to zero
         update_consec_frames = False
