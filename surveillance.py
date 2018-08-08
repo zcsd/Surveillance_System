@@ -63,6 +63,11 @@ elif args.collect_faces:
 key_video_writer = KeyVideoWriter()
 num_consec_frames = 0
 
+# init motion frame counts
+num_motion_frames = 0
+num_total_frames = 0
+start_recording = False
+
 # Initialize SQL Updater
 sql_updater = SqlUpdater()
 try:
@@ -112,6 +117,8 @@ while True:
     # counter should be updated
     update_consec_frames = True
 
+    num_total_frames += 1
+
     # form a nice average before motion detection
     if num_frame_read < 15:
         num_frame_read += 1
@@ -122,6 +129,7 @@ while True:
     ts1 = timestamp.strftime("%Y-%m-%d %H:%M:%S_%f")
 
     if len(motion_locs) > 0:
+        num_motion_frames += 1
         # initialize the minimum and maximum (x, y)-coordinates
         (minX, minY) = (999999, 999999)
         (maxX, maxY) = (-999999, -999999)
@@ -139,7 +147,7 @@ while True:
         update_consec_frames = False
         num_consec_frames = 0
         # if we are not already recording, start recording
-        if not key_video_writer.recording:
+        if not key_video_writer.recording and start_recording:
             video_save_path = "{}/{}.avi".format("/home/zichun/SurveillanceSystem/videos", ts)
             key_video_writer.start(
                 video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 10)
@@ -183,9 +191,18 @@ while True:
     # number of frames with no action, stop recording the clip
     if key_video_writer.recording and num_consec_frames == 60:
         key_video_writer.finish()
-
-    if num_consec_frames > 60:
+        start_recording = False
+    
+    if not key_video_writer.recording and not start_recording and num_motion_frames >= 5:
+        motion_ratio = num_motion_frames / num_total_frames
+        if motion_ratio > 0.4:
+            start_recording = True
+        
+    if num_consec_frames >= 60:
         num_consec_frames = 60
+        num_total_frames = 0
+        num_motion_frames = 0
+        start_recording = False
 
     if SHOW_GUI:
         frame_show = imutils.resize(frame_show, width=1344, height=760)
