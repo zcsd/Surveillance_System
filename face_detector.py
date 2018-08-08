@@ -43,9 +43,9 @@ class FaceDetector:
             for (top, right, bottom, left) in all_locs:
                 area = (bottom - top) * (right - left)
                 var_lap = self.variance_of_laplacian(original_image, (top, right, bottom, left))
-                print("var of lap: {}".format(var_lap))
+                # print("var of lap: {}".format(var_lap))
                 # print("face area: {}".format(area))
-                if area < 3500 or area > 25000 or var_lap < 180:
+                if area < 2500 or area > 30000 or var_lap < 70:
                     all_locs.remove((top, right, bottom, left))
 
         return all_locs

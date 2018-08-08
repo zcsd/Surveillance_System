@@ -67,6 +67,7 @@ num_consec_frames = 0
 sql_updater = SqlUpdater()
 try:
     sql_updater.connect()
+    # sql_updater.truncate()
 except:
     print("[INFO] Failed to Connect SQL. ")
 
@@ -180,11 +181,11 @@ while True:
 
     # if we are recording and reached a threshold on consecutive
     # number of frames with no action, stop recording the clip
-    if key_video_writer.recording and num_consec_frames == 30:
+    if key_video_writer.recording and num_consec_frames == 60:
         key_video_writer.finish()
 
-    if num_consec_frames > 30:
-        num_consec_frames = 30
+    if num_consec_frames > 60:
+        num_consec_frames = 60
 
     if SHOW_GUI:
         frame_show = imutils.resize(frame_show, width=1344, height=760)
