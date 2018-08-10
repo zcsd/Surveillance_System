@@ -42,6 +42,9 @@ right_offsetX = 1500
 up_offsetY = 600
 down_offsetY = 1300
 
+# set image resize ratio for motion and face detection
+motion_resize_ratio = 0.25
+
 # Construct the argument parser
 ap = argparse.ArgumentParser()
 ap.add_argument("-t", "--train", help="train a KNN faces classifier",
@@ -84,7 +87,7 @@ frame_grabber = FrameGrabber(1)
 frame_grabber.start()
 
 # Initialize motion detector
-motion_detector = MotionDetector()
+motion_detector = MotionDetector(_resize_ratio=motion_resize_ratio)
 num_frame_read = 0  # no. of frames read
 
 # Initialize face detector
@@ -107,7 +110,9 @@ while True:
 
     # grab frame
     frame = frame_grabber.read()
+    # frame will be used by motion detector, create another show copy
     frame_show = frame.copy()
+    # Only interested in this ROI region(door area)
     frame_roi = frame[up_offsetY:down_offsetY, left_offsetX:right_offsetX]
     frame_gray = cv2.cvtColor(frame_roi, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
@@ -127,7 +132,7 @@ while True:
     timestamp = datetime.datetime.now()
     ts = timestamp.strftime("%Y-%m-%d %H:%M:%S")
     ts1 = timestamp.strftime("%Y-%m-%d %H:%M:%S_%f")
-
+ 
     if len(motion_locs) > 0:
         num_motion_frames += 1
         # initialize the minimum and maximum (x, y)-coordinates
@@ -175,8 +180,9 @@ while True:
                 sql_updater.insert(info_dict)
 
         # draw red bounding box on moving body
-        cv2.rectangle(frame_show, (minX+left_offsetX, minY+up_offsetY),
-                      (maxX+left_offsetX, maxY+up_offsetY), (0, 0, 255), 3)
+        # because we resize image in motion detector
+        cv2.rectangle(frame_show, (int(minX/motion_resize_ratio)+left_offsetX, int(minY/motion_resize_ratio)+up_offsetY),
+                      (int(maxX/motion_resize_ratio)+left_offsetX, int(maxY/motion_resize_ratio)+up_offsetY), (0, 0, 255), 3)
 
     if update_consec_frames:
         num_consec_frames += 1
@@ -193,9 +199,9 @@ while True:
         key_video_writer.finish()
         start_recording = False
     
-    if not key_video_writer.recording and not start_recording and num_motion_frames >= 5:
+    if not key_video_writer.recording and not start_recording and num_motion_frames >= 4:
         motion_ratio = num_motion_frames / num_total_frames
-        if motion_ratio > 0.4:
+        if motion_ratio > 0.3:
             start_recording = True
         
     if num_consec_frames >= 60:
