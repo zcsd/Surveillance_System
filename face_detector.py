@@ -12,7 +12,7 @@ import cv2
 
 
 class FaceDetector:
-    def __init__(self, _scale=1):
+    def __init__(self, _scale=0.5):
         self._scale = _scale
 
     def detect(self, image):
@@ -38,17 +38,20 @@ class FaceDetector:
     def remove_invalid_face(self, original_image, all_locs):
         # print("face_locs: {}".format(all_locs))
         # print("face size: {} faces found.".format(len(all_locs)))
-
+        new_locs = []
         if len(all_locs) > 0:
             for (top, right, bottom, left) in all_locs:
-                area = (bottom - top) * (right - left)
-                var_lap = self.variance_of_laplacian(original_image, (top, right, bottom, left))
+                (top1, right1, bottom1, left1) = (int(top/self._scale), int(right/self._scale),
+                                                  int(bottom/self._scale), int(left/self._scale))
+                new_locs.append((top1, right1, bottom1, left1))
+                area = (bottom1 - top1) * (right1 - left1) 
+                var_lap = self.variance_of_laplacian(original_image, (top1, right1, bottom1, left1))
                 # print("var of lap: {}".format(var_lap))
                 # print("face area: {}".format(area))
                 if area < 3500 or area > 25000 or var_lap < 120:
-                    all_locs.remove((top, right, bottom, left))
+                    new_locs.remove((top1, right1, bottom1, left1))
 
-        return all_locs
+        return new_locs
 
     def variance_of_laplacian(self, original_image, loc):
         # compute the Laplacian of the image and then return the focus

@@ -44,6 +44,7 @@ down_offsetY = 1300
 
 # set image resize ratio for motion and face detection
 motion_resize_ratio = 0.25
+faceD_resize_ratio = 0.5
 
 # Construct the argument parser
 ap = argparse.ArgumentParser()
@@ -91,7 +92,7 @@ motion_detector = MotionDetector(_resize_ratio=motion_resize_ratio)
 num_frame_read = 0  # no. of frames read
 
 # Initialize face detector
-face_detector = FaceDetector()
+face_detector = FaceDetector(_scale=faceD_resize_ratio)
 # Initialize face recognizer
 knn_face_recognizer = KnnFaceRecognizer()
 
@@ -155,7 +156,7 @@ while True:
         if not key_video_writer.recording and start_recording:
             video_save_path = "{}/{}.avi".format("/home/zichun/SurveillanceSystem/videos", ts)
             key_video_writer.start(
-                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 10)
+                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 20)
         
         if len(known_face_locs) > 0:
             image_save_path = "/home/zichun/SurveillanceSystem/images/" + ts1 + ".jpg"
@@ -171,7 +172,7 @@ while True:
                               (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
                 cv2.rectangle(frame_show, (left+left_offsetX, bottom+up_offsetY),
                               (right+left_offsetX, bottom+up_offsetY+15), (0, 255, 0), -1)
-                cv2.putText(frame_show, name, (int((right-left)/3)+left+left_offsetX, bottom+up_offsetY+12),
+                cv2.putText(frame_show, name, (int((right-left)/4)+left+left_offsetX, bottom+up_offsetY+12),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
                 info_dict['DATETIME'] = ts
                 info_dict['NAME'] = name
