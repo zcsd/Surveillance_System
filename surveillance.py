@@ -32,15 +32,16 @@ import imutils
 from subprocess import call
 import argparse
 import datetime
+import time
 
 # True for showing video GUI, change to false on server OS
 SHOW_GUI = True
 
 # ROI for motion detection and face detection
 left_offsetX = 900
-right_offsetX = 1500
-up_offsetY = 600
-down_offsetY = 1300
+right_offsetX = 1550
+up_offsetY = 650
+down_offsetY = 1200
 
 # set image resize ratio for motion and face detection
 motion_resize_ratio = 0.25
@@ -98,8 +99,10 @@ knn_face_recognizer = KnnFaceRecognizer()
 
 # FPS calculation
 fps = FPS().start()
+current_fps = 0
 
 while True:
+    time_start = time.time()
 
     if not sql_updater.running:
         try:
@@ -187,8 +190,16 @@ while True:
 
     if update_consec_frames:
         num_consec_frames += 1
+    
+    if current_fps >= 100:
+        fpsText = "FPS: " + str(current_fps)
+    elif current_fps >= 10:
+        fpsText = "FPS: " + " " + str(current_fps)
+    else:
+        fpsText = "FPS: " + "  " + str(current_fps)
 
-    # cv2.putText(frame_show, ts, (10, frame_show.shape[0] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+    cv2.putText(frame_show, fpsText, (50, 100),
+               cv2.FONT_HERSHEY_SIMPLEX, 1.8, (255, 255, 255), 3)
     cv2.rectangle(frame_show, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
     frame_toVideo = imutils.resize(frame_show, width=1344, height=760)
     # update the key frame video buffer
@@ -196,7 +207,7 @@ while True:
 
     # if we are recording and reached a threshold on consecutive
     # number of frames with no action, stop recording the clip
-    if key_video_writer.recording and num_consec_frames == 60:
+    if key_video_writer.recording and num_consec_frames == 50:
         key_video_writer.finish()
         start_recording = False
     
@@ -205,8 +216,8 @@ while True:
         if motion_ratio > 0.3:
             start_recording = True
         
-    if num_consec_frames >= 60:
-        num_consec_frames = 60
+    if num_consec_frames >= 50:
+        num_consec_frames = 50
         num_total_frames = 0
         num_motion_frames = 0
         start_recording = False
@@ -216,6 +227,11 @@ while True:
         cv2.imshow("Frame", frame_show)
 
     fps.update()
+
+    time_end = time.time()
+    time_each = time_end - time_start
+    current_fps = int(1 / time_each)
+    # print("{}".format(current_fps))
 
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
