@@ -94,6 +94,7 @@ num_frame_read = 0  # no. of frames read
 
 # Initialize face detector
 face_detector = FaceDetector(_scale=faceD_resize_ratio)
+face_detected = False
 # Initialize face recognizer
 knn_face_recognizer = KnnFaceRecognizer()
 
@@ -128,6 +129,8 @@ while True:
 
     num_total_frames += 1
 
+    face_detected = False
+
     # form a nice average before motion detection
     if num_frame_read < 15:
         num_frame_read += 1
@@ -159,9 +162,10 @@ while True:
         if not key_video_writer.recording and start_recording:
             video_save_path = "{}/{}.avi".format("/home/zichun/SurveillanceSystem/videos", ts)
             key_video_writer.start(
-                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 20)
+                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 15)
         
         if len(known_face_locs) > 0:
+            face_detected = True
             image_save_path = "/home/zichun/SurveillanceSystem/images/" + ts1 + ".jpg"
             cv2.imwrite(image_save_path, frame_roi)
 
@@ -215,6 +219,8 @@ while True:
         motion_ratio = num_motion_frames / num_total_frames
         if motion_ratio > 0.3:
             start_recording = True
+    elif face_detected and not start_recording:
+        start_recording = True
         
     if num_consec_frames >= 50:
         num_consec_frames = 50
