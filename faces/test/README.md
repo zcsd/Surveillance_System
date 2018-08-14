@@ -1,4 +1,4 @@
-*This folder is to save face images dataset for training testing.*
+This folder is to save face images dataset for training testing.
 
 **Directory structure**
 ```

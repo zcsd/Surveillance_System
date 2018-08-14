@@ -12,7 +12,7 @@
 
 **5. Face Images Collection**
 
-**6. KNN Classifier Training**
+**6. KNN/SVM Classifier Training**
 
 **7. Update MySQL Server with(NAME, DATETIME, ACTION)**
 
@@ -37,11 +37,6 @@
 - python3 surveillance.py -h
 
 **Press 'q' for quit program**
-
-**Note on RTSP**
-- IP:172.19.80.36 or sat-cam002
-- admin: starasia2019 (for admin)
-- satcam002: starasia2018 (for stream)
 
 ## **Installation**
 
@@ -178,4 +173,4 @@ pip3 install numpy
 
 
 
-*Jul 24 2018*
+*Aug 14 2018*
