@@ -18,6 +18,7 @@ import cv2
 """
 
 MODEL_SAVE_PATH = "/home/zichun/SurveillanceSystem/classifier/trained_knn_model.clf"
+SVM_SAVE_PATH = "/home/zichun/SurveillanceSystem/classifier/trained_svm_model.clf"
 
 
 class KnnFaceRecognizer:
@@ -25,6 +26,9 @@ class KnnFaceRecognizer:
         self._distance_threshold = _distance_threshold
         with open(MODEL_SAVE_PATH, 'rb') as f:
             self.knn_clf = pickle.load(f)
+        
+        with open(SVM_SAVE_PATH, 'rb') as g:
+            self.svm_clf = pickle.load(g)
         print("[INFO] Face Recognition is working...")
 
     def predict(self, x_img, x_known_face_locs):
@@ -45,6 +49,10 @@ class KnnFaceRecognizer:
             face_encodings, n_neighbors=1)
         are_matches = [closet_distance[0][i][0] <=
                        _distance_threshold for i in range(len(x_known_face_locs))]
-
+        
+        svm_prediction = self.svm_clf.predict(face_encodings)
+        svm_prob = self.svm_clf.decision_function(face_encodings)
+        print(svm_prob)
+        print(svm_prediction)
         # Predict classes and remove classifications that aren't within the threshold
         return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(self.knn_clf.predict(face_encodings), x_known_face_locs, are_matches)]

@@ -4,5 +4,6 @@
 __pycache__
 .DS_Store
 .idea
-images/
-videos/
+*.jpg
+*.avi
+*.clf

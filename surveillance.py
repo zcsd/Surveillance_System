@@ -23,8 +23,8 @@ from key_video_writer import KeyVideoWriter
 from sql_updater import SqlUpdater
 from motion_detector import MotionDetector
 from face_detector import FaceDetector
-from knn_classifier_train import KnnClassifierTrain
-from knn_face_recognizer import KnnFaceRecognizer
+from classifier_train import ClassifierTrain
+from face_recognizer import KnnFaceRecognizer
 from frame_grabber import FrameGrabber
 from imutils.video import FPS
 import cv2
@@ -33,9 +33,14 @@ from subprocess import call
 import argparse
 import datetime
 import time
+import os
 
 # True for showing video GUI, change to false on server OS
 SHOW_GUI = True
+
+# Set default working directory
+HOME_PATH = "/home/zichun/SurveillanceSystem"
+os.chdir(HOME_PATH)
 
 # ROI for motion detection and face detection
 left_offsetX = 900
@@ -56,8 +61,9 @@ ap.add_argument("-c", "--collect_faces", help="collect faces images",
 args = ap.parse_args()
 
 if args.train:
-    knn_classifier_train = KnnClassifierTrain()
-    knn_classifier_train.train()
+    # method: LSVM, KNN, ALL
+    classifier_train = ClassifierTrain(method='ALL')
+    classifier_train.start()
     exit()
 elif args.collect_faces:
     call(["python3", "face_collector.py"])
@@ -160,13 +166,13 @@ while True:
         num_consec_frames = 0
         # if we are not already recording, start recording
         if not key_video_writer.recording and start_recording:
-            video_save_path = "{}/{}.avi".format("/home/zichun/SurveillanceSystem/videos", ts)
+            video_save_path = "{}/{}.avi".format("videos", ts)
             key_video_writer.start(
                 video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 15)
         
         if len(known_face_locs) > 0:
             face_detected = True
-            image_save_path = "/home/zichun/SurveillanceSystem/images/" + ts1 + ".jpg"
+            image_save_path = "images/" + ts1 + ".jpg"
             cv2.imwrite(image_save_path, frame_roi)
 
             #print("[INFO] " + str(len(known_face_locs)) + " face found.")
