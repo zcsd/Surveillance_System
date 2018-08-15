@@ -9,9 +9,12 @@ from face_recognition.face_recognition_cli import image_files_in_folder
 import face_recognition as fr
 from sklearn import neighbors
 from sklearn.svm import LinearSVC
+from sklearn import svm
 from sklearn.metrics import accuracy_score
 from sklearn.manifold import TSNE
+from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
+from mlxtend.plotting import plot_decision_regions
 import cv2
 import numpy as np
 import os
@@ -182,6 +185,7 @@ class ClassifierTrain:
         # Transfer 128-Dimension face encoding to 2-D space
         X_2d = TSNE(n_components=2).fit_transform(X)
         
+        fig = plt.figure()
         # Consturct a orderd set with same order in y
         set_y = {}
         for i, t in enumerate(y):
@@ -192,6 +196,7 @@ class ClassifierTrain:
                     pass
                 else:
                     set_y[len(set_y)] = t
+
         # Display the corresponding file name in scatter position
         if show_file_name:
             file_name_list = []
@@ -203,7 +208,7 @@ class ClassifierTrain:
             for i, p in enumerate(X_2d):
                 plt.text(p[0], p[1], file_name_list[i] , horizontalalignment='center', 
                         verticalalignment='center', fontsize=5, color='gray')
-
+        '''
         # Start and end number for each person's face images
         n_start = 0
         n_end = 0
@@ -222,8 +227,17 @@ class ClassifierTrain:
                      verticalalignment='center', fontsize=15, color='black')
             
             n_start = n_end
+        '''
+        # To display classifier decision region
+        encoder = LabelEncoder()
+        encoder.fit(y)
+        # Numerical encoding of identities
+        y_1d = encoder.transform(y)
+        show_lsvm_clf = svm.SVC(kernel='poly', degree=3)
+        show_lsvm_clf.fit(X_2d, y_1d)    
+        fig = plot_decision_regions(X=X_2d, y=y_1d, clf=show_lsvm_clf, legend=2)
 
-        plt.legend(bbox_to_anchor=(1, 1));
+        # plt.legend(bbox_to_anchor=(1, 1));
         
         #plt.ylim(-25, 25)
         #plt.xlim(-25, 25)
