@@ -10,6 +10,9 @@ import face_recognition as fr
 from sklearn import neighbors
 from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+import cv2
 import os
 import os.path
 import pickle
@@ -70,6 +73,20 @@ class ClassifierTrain:
         elif self.method == "ALL":
             self.lsvm_train()
             self.knn_train(train_n_neighbors=7)
+
+        X_embedded = TSNE(n_components=2).fit_transform(self.X_train)
+        print(len(X_embedded))
+        print(X_embedded)
+        print(len(self.y_train))
+        print(self.y_train)
+        for i, t in enumerate(set(self.y_train)):
+            idx = self.y_train == t
+            plt.scatter(X_embedded[idx, 0], X_embedded[idx, 1], label=t)   
+
+        plt.legend(bbox_to_anchor=(1, 1), loc='best');
+        plt.ylim(-25, 25)
+        plt.xlim(-25, 25)
+        plt.show()
     
     def prepare_data(self, path):
         time_start = time.time()
@@ -88,6 +105,12 @@ class ClassifierTrain:
         for class_dir in os.listdir(path):
             if not os.path.isdir(os.path.join(path, class_dir)):
                 continue
+            
+            # Count how many different persons/faces in training or testing
+            if mode == "training":
+                self.total_persons_train += 1
+            elif mode == "testing":
+                self.total_persons_test += 1
 
             # Loop through each training image for the current person
             for image_path in image_files_in_folder(os.path.join(path, class_dir)):
@@ -100,13 +123,20 @@ class ClassifierTrain:
                     print("[WARNING] Image {} not suitable for {}: {}".format(
                         image_path, mode, "Didn't find a face" if len(faces_boxes) < 1 else "Found more than one face"))
                 else:
+                    # Count how many images in training or testing
+                    if mode == "training":
+                        self.total_images_train += 1
+                    elif mode == "testing":
+                        self.total_images_test += 1
+
                     # Add face encoding for current image to the training set
                     X.append(fr.face_encodings(
                         image, known_face_locations=faces_boxes)[0])
                     y.append(class_dir)
+
         time_end = time.time()
         time_spent = time_end - time_start
-        print("[INFO] Data has been prepared well for {}. Time spent: {:.3f}s".format(mode, time_spent))
+        print("[INFO] Data has been prepared well for {}. Time: {:.3f}s".format(mode, time_spent))
         
         return X, y
 
@@ -132,15 +162,17 @@ class ClassifierTrain:
                 pickle.dump(trained_knn_clf, f)
                 time_end = time.time()
                 time_spent = time_end - time_start
-                print("[INFO] Training completed! KNN Classifier saved! Accuracy:{}, Time spent: {:.3f}s".format(acc_knn, time_spent))
-
+                print("[INFO] KNN training completed with {} classes and {} images. Time: {:.3f}s"
+                      .format(self.total_persons_train, self.total_images_train, time_spent))
+                print("[INFO] KNN testing/verify accuracy with {} classes and {} images: {:.0%}".format(self.total_persons_test, self.total_images_test, acc_knn))
+    
     def lsvm_train(self):
         print("[INFO] Start to train Linear SVM classifier...")
         time_start = time.time()
 
         trained_lsvm_clf = LinearSVC()
         trained_lsvm_clf.fit(self.X_train, self.y_train)
-        acc_svm = accuracy_score(self.y_test, trained_lsvm_clf.predict(self.X_test))
+        acc_lsvm = accuracy_score(self.y_test, trained_lsvm_clf.predict(self.X_test))
 
         # Save the trained SVM classifier
         if LSVM_SAVE_PATH is not None:
@@ -148,4 +180,6 @@ class ClassifierTrain:
                 pickle.dump(trained_lsvm_clf, f)
                 time_end = time.time()
                 time_spent = time_end - time_start
-                print("[INFO] Training completed! SVM Classifier saved! Accuracy:{}, Time spent: {:.3f}s".format(acc_svm, time_spent))
+                print("[INFO] LSVM training completed with {} classes and {} images. Time: {:.3f}s"
+                      .format(self.total_persons_train, self.total_images_train, time_spent))
+                print("[INFO] LSVM testing/verify accuracy with {} classes and {} images: {:.0%}".format(self.total_persons_test, self.total_images_test, acc_lsvm))
