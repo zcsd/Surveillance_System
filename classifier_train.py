@@ -13,6 +13,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import cv2
+import numpy as np
 import os
 import os.path
 import pickle
@@ -52,10 +53,12 @@ LSVM_SAVE_PATH = "classifier/trained_lsvm_model.clf"
 class ClassifierTrain:
     def __init__(self, method='LSVM'):
         self.method = method
+        self.file_name_train = []
         self.X_train = []
         self.y_train = []
         self.total_persons_train = 0
         self.total_images_train = 0
+        self.file_name_test = []
         self.X_test = []
         self.y_test = []
         self.total_persons_test = 0
@@ -74,19 +77,7 @@ class ClassifierTrain:
             self.lsvm_train()
             self.knn_train(train_n_neighbors=7)
 
-        X_embedded = TSNE(n_components=2).fit_transform(self.X_train)
-        print(len(X_embedded))
-        print(X_embedded)
-        print(len(self.y_train))
-        print(self.y_train)
-        for i, t in enumerate(set(self.y_train)):
-            idx = self.y_train == t
-            plt.scatter(X_embedded[idx, 0], X_embedded[idx, 1], label=t)   
-
-        plt.legend(bbox_to_anchor=(1, 1), loc='best');
-        plt.ylim(-25, 25)
-        plt.xlim(-25, 25)
-        plt.show()
+        self.data_visualization(self.X_train, self.y_train, 'train', False)
     
     def prepare_data(self, path):
         time_start = time.time()
@@ -123,11 +114,14 @@ class ClassifierTrain:
                     print("[WARNING] Image {} not suitable for {}: {}".format(
                         image_path, mode, "Didn't find a face" if len(faces_boxes) < 1 else "Found more than one face"))
                 else:
+                    file_name = image_path.strip(path+'/'+class_dir+'/')
                     # Count how many images in training or testing
                     if mode == "training":
                         self.total_images_train += 1
+                        self.file_name_train.append(file_name)
                     elif mode == "testing":
                         self.total_images_test += 1
+                        self.file_name_test.append(file_name)
 
                     # Add face encoding for current image to the training set
                     X.append(fr.face_encodings(
@@ -183,3 +177,54 @@ class ClassifierTrain:
                 print("[INFO] LSVM training completed with {} classes and {} images. Time: {:.3f}s"
                       .format(self.total_persons_train, self.total_images_train, time_spent))
                 print("[INFO] LSVM testing/verify accuracy with {} classes and {} images: {:.0%}".format(self.total_persons_test, self.total_images_test, acc_lsvm))
+
+    def data_visualization(self, X, y, mode, show_file_name):
+        # Transfer 128-Dimension face encoding to 2-D space
+        X_2d = TSNE(n_components=2).fit_transform(X)
+        
+        # Consturct a orderd set with same order in y
+        set_y = {}
+        for i, t in enumerate(y):
+            if len(set_y) == 0:
+                set_y[0] = t
+            else:
+                if t in set_y.values():
+                    pass
+                else:
+                    set_y[len(set_y)] = t
+        # Display the corresponding file name in scatter position
+        if show_file_name:
+            file_name_list = []
+            if mode == 'train':
+                file_name_list = self.file_name_train
+            elif mode == 'test':
+                file_name_list = self.file_name_test
+            
+            for i, p in enumerate(X_2d):
+                plt.text(p[0], p[1], file_name_list[i] , horizontalalignment='center', 
+                        verticalalignment='center', fontsize=5, color='gray')
+
+        # Start and end number for each person's face images
+        n_start = 0
+        n_end = 0
+
+        for i in range(len(set_y)):
+            n_end = n_start + y.count(set_y[i])
+            # Plot scatter for each person
+            plt.scatter(X_2d[n_start:n_end , 0], X_2d[n_start:n_end, 1], label=set_y[i])
+            # Calculate center point for each person
+            p_x = [p for p in X_2d[n_start:n_end, 0]]
+            p_y = [p for p in X_2d[n_start:n_end, 1]]
+            center_x = sum(p_x) / y.count(set_y[i])
+            center_y = sum(p_y) / y.count(set_y[i])
+            # Draw name text for each person on each cluster center
+            plt.text(center_x, center_y, set_y[i], horizontalalignment='center', 
+                     verticalalignment='center', fontsize=15, color='black')
+            
+            n_start = n_end
+
+        plt.legend(bbox_to_anchor=(1, 1));
+        
+        #plt.ylim(-25, 25)
+        #plt.xlim(-25, 25)
+        plt.show()
