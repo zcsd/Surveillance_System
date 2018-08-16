@@ -10,6 +10,8 @@ import face_recognition as fr
 from sklearn import neighbors
 from sklearn.svm import LinearSVC
 from sklearn import svm
+from sklearn.neural_network import MLPClassifier
+from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import LabelEncoder
@@ -80,7 +82,7 @@ class ClassifierTrain:
             self.lsvm_train()
             self.knn_train(train_n_neighbors=7)
 
-        self.data_visualization(self.X_train, self.y_train, 'train', False)
+        self.data_visualization('train', False)
     
     def prepare_data(self, path):
         time_start = time.time()
@@ -181,11 +183,22 @@ class ClassifierTrain:
                       .format(self.total_persons_train, self.total_images_train, time_spent))
                 print("[INFO] LSVM testing/verify accuracy with {} classes and {} images: {:.0%}".format(self.total_persons_test, self.total_images_test, acc_lsvm))
 
-    def data_visualization(self, X, y, mode, show_file_name):
-        # Transfer 128-Dimension face encoding to 2-D space
+    def data_visualization(self, mode, show_file_name):
+        if mode == 'train':
+            X = self.X_train
+            y = self.y_train
+        elif mode == 'test':
+            X = self.X_test
+            y = self.y_test
+        # Transfer 128-Dimension face encoding to 2-D space, only for display purpose
         X_2d = TSNE(n_components=2).fit_transform(X)
+        # Numerical encoding of identities, transfer
+        encoder = LabelEncoder()
+        encoder.fit(y)
+        y_1d = encoder.transform(y)
         
         fig = plt.figure()
+
         # Consturct a orderd set with same order in y
         set_y = {}
         for i, t in enumerate(y):
@@ -208,7 +221,19 @@ class ClassifierTrain:
             for i, p in enumerate(X_2d):
                 plt.text(p[0], p[1], file_name_list[i] , horizontalalignment='center', 
                         verticalalignment='center', fontsize=5, color='gray')
-        '''
+        
+        # This is another way to plot using MLXTEND https://rasbt.github.io/mlxtend/
+        #show_clf = svm.SVC(kernel='poly', degree=3)
+        #show_clf = LinearSVC()
+        #show_clf = svm.SVC(kernel='rbf', gamma=0.7)
+        #show_clf = svm.SVC(kernel='linear')
+        #show_clf = MLPClassifier(alpha=1)
+        #show_clf = GaussianNB()
+        show_clf = neighbors.KNeighborsClassifier(
+            n_neighbors=7, algorithm='ball_tree', weights='distance')
+        show_clf.fit(X_2d, y_1d)    
+        fig = plot_decision_regions(X=X_2d, y=y_1d, clf=show_clf, legend=0)
+
         # Start and end number for each person's face images
         n_start = 0
         n_end = 0
@@ -216,7 +241,7 @@ class ClassifierTrain:
         for i in range(len(set_y)):
             n_end = n_start + y.count(set_y[i])
             # Plot scatter for each person
-            plt.scatter(X_2d[n_start:n_end , 0], X_2d[n_start:n_end, 1], label=set_y[i])
+            # plt.scatter(X_2d[n_start:n_end , 0], X_2d[n_start:n_end, 1], label=set_y[i])
             # Calculate center point for each person
             p_x = [p for p in X_2d[n_start:n_end, 0]]
             p_y = [p for p in X_2d[n_start:n_end, 1]]
@@ -224,21 +249,12 @@ class ClassifierTrain:
             center_y = sum(p_y) / y.count(set_y[i])
             # Draw name text for each person on each cluster center
             plt.text(center_x, center_y, set_y[i], horizontalalignment='center', 
-                     verticalalignment='center', fontsize=15, color='black')
-            
+                     verticalalignment='center', fontsize=16, color='black')
             n_start = n_end
-        '''
-        # To display classifier decision region
-        encoder = LabelEncoder()
-        encoder.fit(y)
-        # Numerical encoding of identities
-        y_1d = encoder.transform(y)
-        show_lsvm_clf = svm.SVC(kernel='poly', degree=3)
-        show_lsvm_clf.fit(X_2d, y_1d)    
-        fig = plot_decision_regions(X=X_2d, y=y_1d, clf=show_lsvm_clf, legend=2)
-
+        
         # plt.legend(bbox_to_anchor=(1, 1));
         
         #plt.ylim(-25, 25)
         #plt.xlim(-25, 25)
+        plt.title('Faces classifier')
         plt.show()
