@@ -163,7 +163,7 @@ class ClassifierTrain:
                 time_spent = time_end - time_start
                 print("[INFO] KNN training completed with {} classes and {} images. Time: {:.3f}s"
                       .format(self.total_persons_train, self.total_images_train, time_spent))
-                print("[INFO] KNN testing/verify accuracy with {} classes and {} images: {:.0%}".format(self.total_persons_test, self.total_images_test, acc_knn))
+                print("[INFO] KNN testing/verify accuracy with {} classes and {} images: {:.2%}".format(self.total_persons_test, self.total_images_test, acc_knn))
     
     def lsvm_train(self):
         print("[INFO] Start to train Linear SVM classifier...")
@@ -181,7 +181,7 @@ class ClassifierTrain:
                 time_spent = time_end - time_start
                 print("[INFO] LSVM training completed with {} classes and {} images. Time: {:.3f}s"
                       .format(self.total_persons_train, self.total_images_train, time_spent))
-                print("[INFO] LSVM testing/verify accuracy with {} classes and {} images: {:.0%}".format(self.total_persons_test, self.total_images_test, acc_lsvm))
+                print("[INFO] LSVM testing/verify accuracy with {} classes and {} images: {:.2%}".format(self.total_persons_test, self.total_images_test, acc_lsvm))
 
     def data_visualization(self, mode, show_file_name):
         if mode == 'train':
