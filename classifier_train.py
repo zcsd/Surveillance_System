@@ -52,11 +52,11 @@ Testing images directory structure:
 TRAIN_DATA_PATH = "faces/train"
 TEST_DATA_PATH = "faces/test"
 KNN_SAVE_PATH = "classifier/trained_knn_model.clf"
-LSVM_SAVE_PATH = "classifier/trained_lsvm_model.clf"
+SVM_SAVE_PATH = "classifier/trained_svm_model.clf"
 
 
 class ClassifierTrain:
-    def __init__(self, method='LSVM'):
+    def __init__(self, method='ALL'):
         self.method = method
         self.file_name_train = []
         self.X_train = []
@@ -74,14 +74,14 @@ class ClassifierTrain:
         self.X_train, self.y_train = self.prepare_data(TRAIN_DATA_PATH)
         self.X_test, self.y_test = self.prepare_data(TEST_DATA_PATH)
 
-        if self.method == 'LSVM':
-            self.lsvm_train()
+        if self.method == 'SVM':
+            self.svm_train()
         elif self.method == 'KNN':
             self.knn_train(train_n_neighbors=7)
         elif self.method == "ALL":
-            self.lsvm_train()
+            self.svm_train()
             self.knn_train(train_n_neighbors=7)
-
+        # second para, False->not show file name, True->show file name
         self.data_visualization('train', False)
     
     def prepare_data(self, path):
@@ -165,23 +165,24 @@ class ClassifierTrain:
                       .format(self.total_persons_train, self.total_images_train, time_spent))
                 print("[INFO] KNN testing/verify accuracy with {} classes and {} images: {:.2%}".format(self.total_persons_test, self.total_images_test, acc_knn))
     
-    def lsvm_train(self):
-        print("[INFO] Start to train Linear SVM classifier...")
+    def svm_train(self):
+        print("[INFO] Start to train a SVM classifier...")
         time_start = time.time()
 
-        trained_lsvm_clf = LinearSVC()
-        trained_lsvm_clf.fit(self.X_train, self.y_train)
-        acc_lsvm = accuracy_score(self.y_test, trained_lsvm_clf.predict(self.X_test))
+        # trained_svm_clf = LinearSVC()
+        trained_svm_clf = svm.SVC(kernel='linear')
+        trained_svm_clf.fit(self.X_train, self.y_train)
+        acc_svm = accuracy_score(self.y_test, trained_svm_clf.predict(self.X_test))
 
         # Save the trained SVM classifier
-        if LSVM_SAVE_PATH is not None:
-            with open(LSVM_SAVE_PATH, 'wb') as f:
-                pickle.dump(trained_lsvm_clf, f)
+        if SVM_SAVE_PATH is not None:
+            with open(SVM_SAVE_PATH, 'wb') as f:
+                pickle.dump(trained_svm_clf, f)
                 time_end = time.time()
                 time_spent = time_end - time_start
-                print("[INFO] LSVM training completed with {} classes and {} images. Time: {:.3f}s"
+                print("[INFO] SVM training completed with {} classes and {} images. Time: {:.3f}s"
                       .format(self.total_persons_train, self.total_images_train, time_spent))
-                print("[INFO] LSVM testing/verify accuracy with {} classes and {} images: {:.2%}".format(self.total_persons_test, self.total_images_test, acc_lsvm))
+                print("[INFO] SVM testing/verify accuracy with {} classes and {} images: {:.2%}".format(self.total_persons_test, self.total_images_test, acc_svm))
 
     def data_visualization(self, mode, show_file_name):
         if mode == 'train':
@@ -226,11 +227,11 @@ class ClassifierTrain:
         #show_clf = svm.SVC(kernel='poly', degree=3)
         #show_clf = LinearSVC()
         #show_clf = svm.SVC(kernel='rbf', gamma=0.7)
-        #show_clf = svm.SVC(kernel='linear')
+        show_clf = svm.SVC(kernel='linear')
         #show_clf = MLPClassifier(alpha=1)
         #show_clf = GaussianNB()
-        show_clf = neighbors.KNeighborsClassifier(
-            n_neighbors=7, algorithm='ball_tree', weights='distance')
+        #show_clf = neighbors.KNeighborsClassifier(
+        #    n_neighbors=7, algorithm='ball_tree', weights='distance')
         show_clf.fit(X_2d, y_1d)    
         fig = plot_decision_regions(X=X_2d, y=y_1d, clf=show_clf, legend=0)
 
@@ -256,5 +257,5 @@ class ClassifierTrain:
         
         #plt.ylim(-25, 25)
         #plt.xlim(-25, 25)
-        plt.title('Faces classifier')
+        plt.title('Faces classifier training')
         plt.show()

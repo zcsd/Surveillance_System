@@ -18,8 +18,6 @@
 
 **8. Save Key Video Clip to file (with Pre-Recording)**
 
-**9. Communicate with other hosts(to do)**
-
 **...**
 
 ## **Usage**
@@ -156,6 +154,12 @@ pip3 install sklearn
 
 pip3 install numpy
 
+sudo apt-get install python3-tk
+
+pip3 install matplotlib
+
+pip3 install mlxtend
+
 ```
 
 
@@ -167,10 +171,8 @@ pip3 install numpy
 
 - One wrong recognition result may cause wrong update, to add continuous/probability checking.
 
-- More face images(how many?) to be trained, better accuracy.
-
 - Add web UI to access and control
 
 
 
-*Aug 14 2018*
+*Aug 28 2018*

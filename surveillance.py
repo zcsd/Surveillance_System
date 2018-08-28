@@ -24,7 +24,7 @@ from sql_updater import SqlUpdater
 from motion_detector import MotionDetector
 from face_detector import FaceDetector
 from classifier_train import ClassifierTrain
-from face_recognizer import KnnFaceRecognizer
+from face_recognizer import FaceRecognizer
 from frame_grabber import FrameGrabber
 from imutils.video import FPS
 import cv2
@@ -61,7 +61,7 @@ ap.add_argument("-c", "--collect_faces", help="collect faces images",
 args = ap.parse_args()
 
 if args.train:
-    # method: LSVM, KNN, ALL
+    # method: SVM, KNN, ALL
     classifier_train = ClassifierTrain(method='ALL')
     classifier_train.start()
     exit()
@@ -83,6 +83,7 @@ start_recording = False
 sql_updater = SqlUpdater()
 try:
     sql_updater.connect()
+    # Delete all data in SQL database
     # sql_updater.truncate()
 except:
     print("[INFO] Failed to Connect SQL. ")
@@ -101,8 +102,8 @@ num_frame_read = 0  # no. of frames read
 # Initialize face detector
 face_detector = FaceDetector(_scale=faceD_resize_ratio)
 face_detected = False
-# Initialize face recognizer
-knn_face_recognizer = KnnFaceRecognizer()
+# Initialize face recognizer, method:SVM(16.0) or KNN(0.50)
+face_recognizer = FaceRecognizer(method='SVM', threshold=16.10)
 
 # FPS calculation
 fps = FPS().start()
@@ -177,8 +178,11 @@ while True:
 
             #print("[INFO] " + str(len(known_face_locs)) + " face found.")
             # Start face recognition
-            predictions = knn_face_recognizer.predict(
+            #time_s = time.time()
+            predictions = face_recognizer.predict(
                 x_img=frame_roi, x_known_face_locs=known_face_locs)
+            #time_e = time.time()
+            #print("predict time: {}s".format(time_e-time_s))
             for name, (top, right, bottom, left) in predictions:
                 print("- Found {} ".format(name) + ts)
                 cv2.rectangle(frame_show, (left+left_offsetX, top+up_offsetY),
