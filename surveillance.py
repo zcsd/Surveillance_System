@@ -86,7 +86,7 @@ while True:
             print("[INFO] Start video recording...")
             video_save_path = "{}/{}.avi".format("videos_temp", ts)
             key_video_writer.start(
-                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 30)
+                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 35)
 
     if update_consec_frames:
         num_consec_frames += 1
