@@ -160,6 +160,8 @@ pip3 install matplotlib
 
 pip3 install mlxtend
 
+pip3 install pyinotify
+
 ```
 
 

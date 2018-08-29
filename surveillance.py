@@ -3,6 +3,11 @@
 # Surveillance system
 # Author: @zichun
 
+"""
+It's used to do motion detection and save the video for analytics, basic surveillance.
+How to use: python3 surveillance.py (make sure video_analytics.py is running too)
+"""
+
 from key_video_writer import KeyVideoWriter
 from motion_detector import MotionDetector
 from frame_grabber import FrameGrabber

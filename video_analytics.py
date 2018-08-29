@@ -1,12 +1,23 @@
-import pyinotify
-from queue import Queue
-import imutils
-import cv2
-import datetime
+#!/usr/bin/python3
+# Python 3.5+
+# Video analytics system with face detection and recognition
+# Author: @zichun
+
+"""
+It's used to do face detection and recognition, update info to SQL database.
+How to use: python3 video_analytics.py (make sure surveillance.py is running too)
+"""
+
 from face_detector import FaceDetector
 from face_recognizer import FaceRecognizer
+from sql_updater import SqlUpdater
+from queue import Queue
 import os
 import collections
+import pyinotify # Used to watch file changes
+import imutils
+import cv2
+
 
 # True for showing video GUI, change to false on server OS
 SHOW_GUI = True
@@ -20,7 +31,7 @@ right_offsetX = 1550
 up_offsetY = 650
 down_offsetY = 1200
 
-# set image resize ratio for face detection
+# set image resize ratio for face detection, reduce calculation
 faceD_resize_ratio = 0.5
 
 # Initialize face detector
@@ -29,29 +40,43 @@ face_detector = FaceDetector(_scale=faceD_resize_ratio)
 # Initialize face recognizer, method:SVM(16.0) or KNN(0.50)
 face_recognizer = FaceRecognizer(method='SVM', threshold=16.10)
 
+# Initialize SQL Updater
+sql_updater = SqlUpdater()
+
+# Declare info dictionary
+info_dict = {'NAME': '', 'TIMESTAMP': '', 'VIDEO_PATH': ''}
+
+# FIFO queue, used to store original video path
 q_path = Queue()
+# FIFO queue, used to indicate whether video file finish writing
 q_flag = Queue()
 
-wm = pyinotify.WatchManager()  # Watch Manager
+# Watch Manager using pyinotify library
+wm = pyinotify.WatchManager()  
 
+# rewrite subclass of pyinotify Eventhandler
 class EventHandler(pyinotify.ProcessEvent):
     def process_IN_CREATE(self, event):
         q_path.put(event.pathname)
     def process_IN_CLOSE_WRITE(self, event):
-        q_flag.put(1)
+        q_flag.put(1) # Indicate whether finish writing
 
-mask = pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CREATE
-
+# Note: notifier is threaded safe 
 notifier = pyinotify.ThreadedNotifier(wm, EventHandler())
+mask = pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CREATE
 wdd = wm.add_watch('/home/zichun/SurveillanceSystem/videos_temp', mask)
 notifier.start()
 
 def process(file_path):
     print("[INFO] Start to process {}".format(file_path))
     file_time = file_path.replace('/home/zichun/SurveillanceSystem/videos_temp/','').replace('.avi', '')
+    
+    # Save another processed video file
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     video_save_path = "{}/{}.avi".format("videos", file_time)
     out = cv2.VideoWriter(video_save_path, fourcc, 35, (1344,760))
+    
+    # how many face images in all frames in this video
     face_cnt = 0
     names = [] 
     stream = cv2.VideoCapture(file_path)
@@ -67,15 +92,12 @@ def process(file_path):
         if len(known_face_locs) > 0:
             face_cnt += 1
             image_save_path = "images/" + file_time + "_" +str(face_cnt) + ".jpg"
-            cv2.imwrite(image_save_path, frame_roi)
+            # cv2.imwrite(image_save_path, frame_roi)
 
             #print("[INFO] " + str(len(known_face_locs)) + " face found.")
-            # Start face recognition
-            #time_s = time.time()
             predictions = face_recognizer.predict(
                 x_img=frame_roi, x_known_face_locs=known_face_locs)
-            #time_e = time.time()
-            #print("predict time: {}s".format(time_e-time_s))
+
             for name, (top, right, bottom, left) in predictions:
                 #print("- Found {} ".format(name))
                 names.append(name)
@@ -95,15 +117,23 @@ def process(file_path):
             cv2.imshow("Frame", frame_to_video)
         cv2.waitKey(1)
     
+    # Uses to count how many images for each person
     name_counter=collections.Counter(names)
-
+    
+    # TODO: more strategy to determine muitiple person
     if face_cnt == 0:
         person_id = "None"
     else:
         person_id = name_counter.most_common(1)[0][0]
     
     full_video_path = HOME_PATH + video_save_path
-    print("Found {} on {}, saved in {}".format(person_id, file_time, full_video_path))
+    
+    info_dict['NAME'] = person_id
+    info_dict['TIMESTAMP'] = file_time.replace('_', ' ')
+    info_dict['VIDEO_PATH'] = full_video_path
+
+    print(info_dict)
+    # Delete original video
     os.remove(file_path)
     out.release()
     stream.release()    
