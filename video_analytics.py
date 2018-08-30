@@ -42,6 +42,12 @@ face_recognizer = FaceRecognizer(method='SVM', threshold=16.10)
 
 # Initialize SQL Updater
 sql_updater = SqlUpdater()
+try:
+    sql_updater.connect()
+    # Delete all data in SQL database
+    # sql_updater.truncate()
+except:
+    print("[INFO] Failed to Connect SQL. ")
 
 # Declare info dictionary
 info_dict = {'NAME': '', 'TIMESTAMP': '', 'VIDEO_PATH': ''}
@@ -132,7 +138,8 @@ def process(file_path):
     info_dict['TIMESTAMP'] = file_time.replace('_', ' ')
     info_dict['VIDEO_PATH'] = full_video_path
 
-    print(info_dict)
+    #print(info_dict)
+    sql_updater.insert(info_dict)
     # Delete original video
     os.remove(file_path)
     out.release()
@@ -140,6 +147,15 @@ def process(file_path):
     cv2.destroyAllWindows()
 
 while True:
+    '''
+    if not sql_updater.running:
+        try:
+            sql_updater.connect()
+        except:
+            pass
+        else:
+            print("[INFO] Succeed to Connect SQL. ")
+    '''
     if not q_path.empty() and not q_flag.empty():
         q_flag.get()
         process(q_path.get())

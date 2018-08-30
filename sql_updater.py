@@ -78,9 +78,9 @@ class SqlUpdater:
             self.connection.rollback()
 
     def insert(self, dict):
-        sql = "INSERT INTO TIMELOG(NAME, DATETIME, ACTION)\
+        sql = "INSERT INTO TIMELOG(NAME, TIMESTAMP, VIDEO_PATH)\
                VALUES ('{}', '{}', '{}')".\
-            format(dict['NAME'], dict['DATETIME'], dict['ACTION'])
+            format(dict['NAME'], dict['TIMESTAMP'], dict['VIDEO_PATH'])
         # print(self.connection.ping())
 
         try:
@@ -90,8 +90,8 @@ class SqlUpdater:
             self.connection.commit()
         except:
             # Backup to local file if insert failed
-            seq = str(dict['NAME']) + "  " + str(dict['DATETIME']
-                                                 ) + "  " + str(dict['ACTION']) + "\n"
+            seq = str(dict['NAME']) + "  " + str(dict['TIMESTAMP']
+                                                 ) + "  " + str(dict['VIDEO_PATH']) + "\n"
             with open('timelog/backup.txt', 'a') as f:
                 f.writelines(seq)
             f.close()
