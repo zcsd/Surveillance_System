@@ -7,7 +7,7 @@
 How to use: python3 training.py
 """
 
-from classifier_train import ClassifierTrain
+from src.classifier_train import ClassifierTrain
 
 
 # method: SVM, KNN, ALL

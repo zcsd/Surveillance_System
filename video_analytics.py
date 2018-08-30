@@ -8,9 +8,9 @@ It's used to do face detection and recognition, update info to SQL database.
 How to use: python3 video_analytics.py (make sure surveillance.py is running too)
 """
 
-from face_detector import FaceDetector
-from face_recognizer import FaceRecognizer
-from sql_updater import SqlUpdater
+from src.face_detector import FaceDetector
+from src.face_recognizer import FaceRecognizer
+from src.sql_updater import SqlUpdater
 from queue import Queue
 import os
 import collections

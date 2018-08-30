@@ -8,9 +8,9 @@ It's used to do motion detection and save the video for analytics, basic surveil
 How to use: python3 surveillance.py (make sure video_analytics.py is running too)
 """
 
-from key_video_writer import KeyVideoWriter
-from motion_detector import MotionDetector
-from frame_grabber import FrameGrabber
+from src.key_video_writer import KeyVideoWriter
+from src.motion_detector import MotionDetector
+from src.frame_grabber import FrameGrabber
 from imutils.video import FPS
 import cv2
 import imutils
