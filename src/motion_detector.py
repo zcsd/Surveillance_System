@@ -18,7 +18,7 @@ class MotionDetector:
         self._accum_weight = _accum_weight  # the frame accumulation weight
         self._delta_thresh = _delta_thresh  # fixed threshold for the delta image
         self._min_area = _min_area * _resize_ratio  # min area for motion detected
-        self._resize_ratio = _resize_ratio # image resize ratio
+        self._resize_ratio = _resize_ratio  # image resize ratio
 
         # initialize the average image for motion detection
         self._avg = None
@@ -26,7 +26,7 @@ class MotionDetector:
     def update(self, image_gray):
         # Resize input image to smaller size, accumulate process
         image_small = imutils.resize(image_gray, width=int(image_gray.shape[1]*self._resize_ratio),
-                                                 height=int(image_gray.shape[0]*self._resize_ratio))
+                                     height=int(image_gray.shape[0]*self._resize_ratio))
         # initialize the list of locations containing motion
         locs = []
 
@@ -54,6 +54,6 @@ class MotionDetector:
             # only add the contour to the locs list if it > _min_area
             if cv2.contourArea(c) > self._min_area:
                 locs.append(c)
-        
-        # NOTE: these locations are in this small size image coordinate system. 
+
+        # NOTE: these locations are in this small size image coordinate system.
         return locs

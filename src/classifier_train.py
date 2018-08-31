@@ -68,7 +68,7 @@ class ClassifierTrain:
         self.y_test = []
         self.total_persons_test = 0
         self.total_images_test = 0
-    
+
     def start(self):
         print("[INFO] It's going to train a face classifer.")
         self.X_train, self.y_train = self.prepare_data(TRAIN_DATA_PATH)
@@ -83,7 +83,7 @@ class ClassifierTrain:
             self.knn_train(train_n_neighbors=7)
         # second para, False->not show file name, True->show file name
         self.data_visualization('train', False)
-    
+
     def prepare_data(self, path):
         time_start = time.time()
 
@@ -91,7 +91,7 @@ class ClassifierTrain:
             mode = "training"
         elif "test" in path:
             mode = "testing"
-        
+
         print("[INFO] Start to prepare data for {}...".format(mode))
 
         X = []
@@ -101,7 +101,7 @@ class ClassifierTrain:
         for class_dir in os.listdir(path):
             if not os.path.isdir(os.path.join(path, class_dir)):
                 continue
-            
+
             # Count how many different persons/faces in training or testing
             if mode == "training":
                 self.total_persons_train += 1
@@ -136,7 +136,7 @@ class ClassifierTrain:
         time_end = time.time()
         time_spent = time_end - time_start
         print("[INFO] Data has been prepared well for {}. Time: {:.3f}s".format(mode, time_spent))
-        
+
         return X, y
 
     def knn_train(self, train_n_neighbors):
@@ -164,7 +164,7 @@ class ClassifierTrain:
                 print("[INFO] KNN training completed with {} classes and {} images. Time: {:.3f}s"
                       .format(self.total_persons_train, self.total_images_train, time_spent))
                 print("[INFO] KNN testing/verify accuracy with {} classes and {} images: {:.2%}".format(self.total_persons_test, self.total_images_test, acc_knn))
-    
+
     def svm_train(self):
         print("[INFO] Start to train a SVM classifier...")
         time_start = time.time()
@@ -197,7 +197,7 @@ class ClassifierTrain:
         encoder = LabelEncoder()
         encoder.fit(y)
         y_1d = encoder.transform(y)
-        
+
         fig = plt.figure()
 
         # Consturct a orderd set with same order in y
@@ -218,11 +218,11 @@ class ClassifierTrain:
                 file_name_list = self.file_name_train
             elif mode == 'test':
                 file_name_list = self.file_name_test
-            
+
             for i, p in enumerate(X_2d):
-                plt.text(p[0], p[1], file_name_list[i] , horizontalalignment='center', 
+                plt.text(p[0], p[1], file_name_list[i] , horizontalalignment='center',
                         verticalalignment='center', fontsize=5, color='gray')
-        
+
         # This is another way to plot using MLXTEND https://rasbt.github.io/mlxtend/
         #show_clf = svm.SVC(kernel='poly', degree=3)
         #show_clf = LinearSVC()
@@ -232,7 +232,7 @@ class ClassifierTrain:
         #show_clf = GaussianNB()
         #show_clf = neighbors.KNeighborsClassifier(
         #    n_neighbors=7, algorithm='ball_tree', weights='distance')
-        show_clf.fit(X_2d, y_1d)    
+        show_clf.fit(X_2d, y_1d)
         fig = plot_decision_regions(X=X_2d, y=y_1d, clf=show_clf, legend=0)
 
         # Start and end number for each person's face images
@@ -249,12 +249,12 @@ class ClassifierTrain:
             center_x = sum(p_x) / y.count(set_y[i])
             center_y = sum(p_y) / y.count(set_y[i])
             # Draw name text for each person on each cluster center
-            plt.text(center_x, center_y, set_y[i], horizontalalignment='center', 
+            plt.text(center_x, center_y, set_y[i], horizontalalignment='center',
                      verticalalignment='center', fontsize=16, color='black')
             n_start = n_end
-        
+
         # plt.legend(bbox_to_anchor=(1, 1));
-        
+
         #plt.ylim(-25, 25)
         #plt.xlim(-25, 25)
         plt.title('Faces classifier training')

@@ -14,6 +14,7 @@ PWD = "1024"
 DB = "office-iot"
 TB = 'TIMELOG'
 
+
 # Write timelog information to text file if sql connection fail
 def backup_to_timelog(q):
     seq_list = []

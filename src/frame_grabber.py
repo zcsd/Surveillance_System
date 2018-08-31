@@ -26,25 +26,19 @@ class FrameGrabber:
 
     def start(self):
         print("[INFO] Starting Video Stream...")
-        # use original opencv capture mode, no buffer
-        self.video_stream = cv2.VideoCapture(self.source)
-        '''
         if self.src_from_rtsp:
-            # self.video_stream = WebcamVideoStream(self.source)
-            self.video_stream = cv2.VideoCapture(self.source)
+            self.video_stream = WebcamVideoStream(self.source)
         else:
-            # this one has buffer
             self.video_stream = WebcamVideoStream(self.source)
             self.video_stream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
             self.video_stream.stream.set(
                 cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
-           
-        # self.video_stream.start()
-        # time.sleep(1.0)  # for warm up camera, 1 second
-        '''
+
+        self.video_stream.start()
+        time.sleep(1.0)  # for warm up camera, 1 second
+
     def read(self):
-        # raw_frame = self.video_stream.read()
-        (grabbed, raw_frame) = self.video_stream.read()
+        raw_frame = self.video_stream.read()
         '''
         if self.src_from_rtsp:
             # Return same-sized frame for both rtsp and webcam
@@ -56,5 +50,5 @@ class FrameGrabber:
         return raw_frame
 
     def stop(self):
-        self.video_stream.release()
+        self.video_stream.stop()
         print("[INFO] Stream Closed. ")

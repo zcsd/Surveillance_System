@@ -18,7 +18,7 @@ class FaceRecognizer:
         self.threshold = threshold
         self.method = method
         self.clf = None
-        
+
         if self.method == 'KNN':
             clf_path = KNN_SAVE_PATH
         elif self.method == 'SVM':
@@ -32,8 +32,9 @@ class FaceRecognizer:
                 # map label/name to corresponding index
                 self.classes_dict[class_] = class_index
                 class_index += 1
-        
-        print("[INFO] Face Recognition is working, {} is used and {} persons are in database.".format(self.method, class_index))
+
+        print("[INFO] Face Recognition is working, {} is used and {} persons are in database.".format(
+            self.method, class_index))
 
     def predict(self, x_img, x_known_face_locs):
         if self.clf is None:
@@ -46,16 +47,17 @@ class FaceRecognizer:
         # Find encodings for faces in the test iamge
         face_encodings = fr.face_encodings(
             x_img, known_face_locations=x_known_face_locs)
-        
+
         # It's will be a match(True) if distance/parobability is within threshod.
-        are_matches = [] # Note: it's a list, there may be muitiple faces in image
+        are_matches = []  # Note: it's a list, there may be muitiple faces in image
         if self.method == 'KNN':
             # Get the closet distance from all classes, it's a float number(0.xx)
-            closet_distance = self.clf.kneighbors(face_encodings, n_neighbors=1)
+            closet_distance = self.clf.kneighbors(
+                face_encodings, n_neighbors=1)
             # if the closet distance <= threshold(0.5~0.6), it could be considered to be a match.
             # More tight match if threshold is set smaller
             are_matches = [closet_distance[0][i][0] <=
-                       self.threshold for i in range(len(x_known_face_locs))]
+                           self.threshold for i in range(len(x_known_face_locs))]
         elif self.method == 'SVM':
             # Get a list of probability of all classes
             probabilities = self.clf.decision_function(face_encodings)
@@ -64,5 +66,5 @@ class FaceRecognizer:
             # More tight match if threshold is set larger.
             are_matches = [max(probabilities[i]) >=
                            self.threshold for i in range(len(x_known_face_locs))]
-        
+
         return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(self.clf.predict(face_encodings), x_known_face_locs, are_matches)]

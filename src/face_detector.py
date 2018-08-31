@@ -44,8 +44,9 @@ class FaceDetector:
                 (top1, right1, bottom1, left1) = (int(top/self._scale), int(right/self._scale),
                                                   int(bottom/self._scale), int(left/self._scale))
                 new_locs.append((top1, right1, bottom1, left1))
-                area = (bottom1 - top1) * (right1 - left1) 
-                var_lap = self.variance_of_laplacian(original_image, (top1, right1, bottom1, left1))
+                area = (bottom1 - top1) * (right1 - left1)
+                var_lap = self.variance_of_laplacian(
+                    original_image, (top1, right1, bottom1, left1))
                 # print("var of lap: {}".format(var_lap))
                 # print("face area: {}".format(area))
                 if area < 3500 or area > 25000 or var_lap < 120:
@@ -56,4 +57,4 @@ class FaceDetector:
     def variance_of_laplacian(self, original_image, loc):
         # compute the Laplacian of the image and then return the focus
         # measure, which is simply the variance of the Laplacian
-        return cv2.Laplacian(original_image[loc[0]:loc[2], loc[3]:loc[1]], cv2.CV_64F).var()     
+        return cv2.Laplacian(original_image[loc[0]:loc[2], loc[3]:loc[1]], cv2.CV_64F).var()

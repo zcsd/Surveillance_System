@@ -14,7 +14,7 @@
 
 **6. KNN/SVM Classifier Training**
 
-**7. Update MySQL Server with(NAME, TIMESTAMP, VIDEO_PATH)**
+**7. Update MySQL Server with(NAME, DATETIME, ACTION)**
 
 **8. Save Key Video Clip to file (with Pre-Recording)**
 
@@ -40,7 +40,8 @@
 
 **Requirements**
 - Python3.5+ (Recommend Python3.6)
-- Ubuntu(16.04/18.04)
+- Ubuntu(16.04+)/Linux
+- Recommend to install python3 library bindings in python3 virtualenv(Ref: https://gist.github.com/Geoyi/d9fab4f609e9f75941946be45000632b)
 
 **Steps:**
 
@@ -141,7 +142,7 @@ pip3 install face_recognition
 
 ```
 
-pip3 install opencv-python==3.4.2.17
+pip3 install opencv-python
 
 pip3 install pymysql
 
@@ -158,8 +159,6 @@ sudo apt-get install python3-tk
 pip3 install matplotlib
 
 pip3 install mlxtend
-
-pip3 install pyinotify
 
 ```
 
