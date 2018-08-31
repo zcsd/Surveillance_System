@@ -49,7 +49,7 @@ class FaceDetector:
                     original_image, (top1, right1, bottom1, left1))
                 # print("var of lap: {}".format(var_lap))
                 # print("face area: {}".format(area))
-                if area < 3500 or area > 25000 or var_lap < 120:
+                if area < 3500 or area > 25000 or var_lap < 100:
                     new_locs.remove((top1, right1, bottom1, left1))
 
         return new_locs

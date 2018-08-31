@@ -2,6 +2,7 @@ sudo crontab -e
 
 # launch surveillance system on 06:30AM everyday
 30 06 * * * nohup python3 /home/zichun/SurveillanceSystem/surveillance.py &
+31 06 * * * nohup python3 /home/zichun/SurveillanceSystem/video_analytics.py &
 # reboot pc 06:20AM everyday, = close program
 20 06 * * * sudo reboot
 # Delete video files that older than 3 days

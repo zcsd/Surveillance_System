@@ -2,98 +2,78 @@
 
 ## **Basic Function**
 
-**1. Video Streaming(read from RTSP)**
+**1. Video Streaming(read from RTSP or usb webcam)**
 
 **2. Motion Detection**
 
-**3. Face Detection**
+**3. Face Detection(based on HoG and CNN provided by Dlib)**
 
-**4. Face Recognition**
+**4. Face Recognition(based on CNN provided by DLib, 99.38% accuracy in LFW test)**
 
 **5. Face Images Collection**
 
-**6. KNN/SVM Classifier Training**
+**6. KNN/SVM Classifier Training(training on top of 128-D face encoding)**
 
-**7. Update MySQL Server with(NAME, DATETIME, ACTION)**
+**7. Update MySQL Server with event(NAME, TIMESTAMP, VIDEO_PATH)**
 
-**8. Save Key Video Clip to file (with Pre-Recording)**
+**8. Save Key Video Clip with motion to file (with Pre-Recording)**
 
-**...**
+## **Introduction**
+
+This project is to develop a office/home/factory surveillance system, ip camera(access by RTSP) and usb webcam could be used as video stream source, a video clip will be saved if motion detected, it's done in surveillance.py; once there is a new saved video clip, video_analytics.py will start to read the video, do the face detection and recognition(multiple face), finally it will conclule who are in video, and send (name, timestamp, video_path) to SQL server.
+
+Face detection and recognition depend on Dlib library, HoG is used in face detection because it's fast and accurate; Dlib return a 128-dimension face encoding for each face detected, on top of this 128D feature vector, I train a KNN/SVM classifier to recognize the person from my face database, the accuracy is very nice if the face quality is good. The face recognition model in DLib is a ResNet network with 27 conv layers, was trained from scratch on a dataset of about 3 million faces, achive 99.38% accuracy in LFW.
 
 ## **Usage**
 
-**Normal Usage(surveillance and face recognition):**
-- python3 surveillance.py
+**Directory structure for face database**
+- Put face images into <SurveillanceSystem/faces/train> folder for next setp training, each person has one folder. You also can put test face images in <SurveillanceSystem/faces/test> if you want training accuracy.
+
+```
+    <SurveillanceSystem/faces/train>/
+    ├── <person1>/
+    │   ├── <somename1>.jpg
+    │   ├── <somename2>.jpg
+    │   ├── ...
+    ├── <person2>/
+    │   ├── <somename1>.jpg
+    │   └── <somename2>.jpg
+    └── ...
+```
 
 **Train a new classifier when face images databse changed:**
-- python3 surveillance.py -t
+- python3 training.py
 
-**Collect face images for training and saving:**
-- python3 surveillance.py -c
+**Normal Usage(surveillance and face recognition):**
+- ./start.sh (you need to "chmod +x start.sh" for first time using")
 
-**Show help text:**
-- python3 surveillance.py -h
+**Only use basic surveillance without face recognition:**
+- python3 surveillance.py
 
-**Press 'q' for quit program**
+**Press 'q' for quit program in GUI mode**
+
+**NOTE:**
+- You need to change some path variable and image ROI area for new setup PC and environemnt before using, detail in code comment. 
 
 ## **Installation**
 
 **Requirements**
-- Python3.5+ (Recommend Python3.6)
-- Ubuntu(16.04+)/Linux
-- Recommend to install python3 library bindings in python3 virtualenv(Ref: https://gist.github.com/Geoyi/d9fab4f609e9f75941946be45000632b)
+- Python3.5+
+- Ubuntu(16.04/18.04)
 
 **Steps:**
 
 - Install Dlib(http://dlib.net/) with Python3 bindings
 
-Install dependancy(pass in Linux/Ubuntu):
+Install library dependancy(pass in Ubuntu 16.04/18.04):
 
 ```
 
 sudo apt-get update
 
-sudo apt-get install python3-pip\
+sudo apt-get install python3-pip build-essential cmake gfortran git wget curl graphicsmagick libgraphicsmagick1-dev libavcodec-dev libavformat-dev libgtk2.0-dev libjpeg-dev liblapack-dev libswscale-dev pkg-config python3-dev python3-numpy software-properties-common zip
 
-    build-essential \
-
-    cmake \
-
-    gfortran \
-
-    git \
-
-    wget \
-
-    curl \
-
-    graphicsmagick \
-
-    libgraphicsmagick1-dev \
-
-    libatlas-dev(change to libatlas-base-dev for Ubuntu 18.04) \
-
-    libavcodec-dev \
-
-    libavformat-dev \
-
-    libgtk2.0-dev \
-
-    libjpeg-dev \
-
-    liblapack-dev \
-
-    libswscale-dev \
-
-    pkg-config \
-
-    python3-dev \
-
-    python3-numpy \
-
-    software-properties-common \
-
-    zip \
+sudo apt-get install libatlas-dev (change to libatlas-base-dev for Ubuntu 18.04)
 
 sudo apt-get clean && rm -rf /tmp/* /var/tmp/*
 
@@ -105,6 +85,8 @@ Clone the code from github:
 
 ```
 
+mkdir dlib; cd dlib
+
 git clone https://github.com/davisking/dlib.git
 
 ```
@@ -112,13 +94,11 @@ git clone https://github.com/davisking/dlib.git
 Build the main dlib library:
 ```
 
-cd dlib
-
 mkdir build; cd build; cmake .. -DDLIB_USE_CUDA=0 -DUSE_AVX_INSTRUCTIONS=1; cmake --build .
 
 ```
 
-Build and install the Python extensions:
+Build and install the Python3 extensions(NOT use CUDA):
 
 ```
 
@@ -130,7 +110,7 @@ python3 setup.py install --yes USE_AVX_INSTRUCTIONS --no DLIB_USE_CUDA
 
 At this point, you should be able to run ```python3``` and type ```import dlib``` successfully.
 
-- Install face_recognition library:
+- Install face_recognition library(depend on Dlib):
 
 ```
 
@@ -142,7 +122,7 @@ pip3 install face_recognition
 
 ```
 
-pip3 install opencv-python
+pip3 install opencv-python==3.4.2.17 (3.4.1 has bugs)
 
 pip3 install pymysql
 
@@ -160,19 +140,24 @@ pip3 install matplotlib
 
 pip3 install mlxtend
 
+pip3 install pyinotify
+
 ```
 
-
-## **Future Optimization/Bugs to be fiexed**
+## **TODO**
 
 - Reconnect SQL server if networt revover.
 
-- Now the program process every frame with faces and send every frame results to SQL, will only send 1 result for one person in a time range(~2min?)
+- Resend inforamtion in backup timelog to SQL server if network recover.
 
-- One wrong recognition result may cause wrong update, to add continuous/probability checking.
+- Optimize multiple face recogniton in video-based analytics.
 
-- Add web UI to access and control
+- Improve accuracy for unknown face recognition.
 
+- Read config from file for easy setting.
 
+- Be able to ignore light on/off event.
 
-*Aug 28 2018*
+- Add web UI to dor daily view, access and control.
+
+*Aug 31 2018*

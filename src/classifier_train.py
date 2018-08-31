@@ -1,9 +1,9 @@
 # Class ClassifierTrain
 
-"""
+'''
 Method 1: SVM (Support Vector Machine)
 Method 2: KNN (K-Nearst-Neighbors)
-"""
+'''
 
 from face_recognition.face_recognition_cli import image_files_in_folder
 import face_recognition as fr
@@ -25,7 +25,7 @@ import pickle
 import math
 import time
 
-"""
+'''
  Training images directory structure:
     <train>/
     ├── <person1>/
@@ -47,7 +47,7 @@ Testing images directory structure:
     │   ├── <somename1>.jpg
     │   └── <somename2>.jpg
     └── ...
-"""
+'''
 
 TRAIN_DATA_PATH = "faces/train"
 TEST_DATA_PATH = "faces/test"
@@ -135,7 +135,8 @@ class ClassifierTrain:
 
         time_end = time.time()
         time_spent = time_end - time_start
-        print("[INFO] Data has been prepared well for {}. Time: {:.3f}s".format(mode, time_spent))
+        print("[INFO] Data has been prepared well for {}. Time: {:.3f}s".format(
+            mode, time_spent))
 
         return X, y
 
@@ -145,7 +146,8 @@ class ClassifierTrain:
         # Determine how many neighbors to use for weighting in the KNN classifier
         if train_n_neighbors is None:
             train_n_neighbors = int(round(math.sqrt(len(self.X_train))))
-            print("[INFO] Chose n_neighbors for KNN automatically:", train_n_neighbors)
+            print("[INFO] Chose n_neighbors for KNN automatically:",
+                  train_n_neighbors)
         else:
             print("[INFO] Chose n_neighbors for KNN:", train_n_neighbors)
 
@@ -153,7 +155,8 @@ class ClassifierTrain:
         trained_knn_clf = neighbors.KNeighborsClassifier(
             n_neighbors=train_n_neighbors, algorithm='ball_tree', weights='distance')
         trained_knn_clf.fit(self.X_train, self.y_train)
-        acc_knn = accuracy_score(self.y_test, trained_knn_clf.predict(self.X_test))
+        acc_knn = accuracy_score(
+            self.y_test, trained_knn_clf.predict(self.X_test))
 
         # Save the trained KNN classifier
         if KNN_SAVE_PATH is not None:
@@ -163,7 +166,8 @@ class ClassifierTrain:
                 time_spent = time_end - time_start
                 print("[INFO] KNN training completed with {} classes and {} images. Time: {:.3f}s"
                       .format(self.total_persons_train, self.total_images_train, time_spent))
-                print("[INFO] KNN testing/verify accuracy with {} classes and {} images: {:.2%}".format(self.total_persons_test, self.total_images_test, acc_knn))
+                print("[INFO] KNN testing/verify accuracy with {} classes and {} images: {:.2%}".format(
+                    self.total_persons_test, self.total_images_test, acc_knn))
 
     def svm_train(self):
         print("[INFO] Start to train a SVM classifier...")
@@ -172,7 +176,8 @@ class ClassifierTrain:
         # trained_svm_clf = LinearSVC()
         trained_svm_clf = svm.SVC(kernel='linear')
         trained_svm_clf.fit(self.X_train, self.y_train)
-        acc_svm = accuracy_score(self.y_test, trained_svm_clf.predict(self.X_test))
+        acc_svm = accuracy_score(
+            self.y_test, trained_svm_clf.predict(self.X_test))
 
         # Save the trained SVM classifier
         if SVM_SAVE_PATH is not None:
@@ -182,7 +187,8 @@ class ClassifierTrain:
                 time_spent = time_end - time_start
                 print("[INFO] SVM training completed with {} classes and {} images. Time: {:.3f}s"
                       .format(self.total_persons_train, self.total_images_train, time_spent))
-                print("[INFO] SVM testing/verify accuracy with {} classes and {} images: {:.2%}".format(self.total_persons_test, self.total_images_test, acc_svm))
+                print("[INFO] SVM testing/verify accuracy with {} classes and {} images: {:.2%}".format(
+                    self.total_persons_test, self.total_images_test, acc_svm))
 
     def data_visualization(self, mode, show_file_name):
         if mode == 'train':
@@ -220,8 +226,8 @@ class ClassifierTrain:
                 file_name_list = self.file_name_test
 
             for i, p in enumerate(X_2d):
-                plt.text(p[0], p[1], file_name_list[i] , horizontalalignment='center',
-                        verticalalignment='center', fontsize=5, color='gray')
+                plt.text(p[0], p[1], file_name_list[i], horizontalalignment='center',
+                         verticalalignment='center', fontsize=5, color='gray')
 
         # This is another way to plot using MLXTEND https://rasbt.github.io/mlxtend/
         #show_clf = svm.SVC(kernel='poly', degree=3)
@@ -230,7 +236,7 @@ class ClassifierTrain:
         show_clf = svm.SVC(kernel='linear')
         #show_clf = MLPClassifier(alpha=1)
         #show_clf = GaussianNB()
-        #show_clf = neighbors.KNeighborsClassifier(
+        # show_clf = neighbors.KNeighborsClassifier(
         #    n_neighbors=7, algorithm='ball_tree', weights='distance')
         show_clf.fit(X_2d, y_1d)
         fig = plot_decision_regions(X=X_2d, y=y_1d, clf=show_clf, legend=0)

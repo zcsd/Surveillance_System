@@ -5,10 +5,8 @@ import imutils
 import cv2
 import time
 
+
 RTSP_URL = "rtsp://satcam002:starasia2018@172.19.80.36:554/cam/realmonitor?channel=1&subtype=0"
-# Camera resolution setting
-FRAME_WIDTH = 320
-FRAME_HEIGHT = 240
 
 
 class FrameGrabber:
@@ -25,30 +23,20 @@ class FrameGrabber:
         self.video_stream = None
 
     def start(self):
+        # Use original opencv capture mode, no buffer
+        self.video_stream = cv2.VideoCapture(self.source)
         print("[INFO] Starting Video Stream...")
-        if self.src_from_rtsp:
-            self.video_stream = WebcamVideoStream(self.source)
-        else:
-            self.video_stream = WebcamVideoStream(self.source)
-            self.video_stream.stream.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
-            self.video_stream.stream.set(
-                cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
-
-        self.video_stream.start()
-        time.sleep(1.0)  # for warm up camera, 1 second
 
     def read(self):
-        raw_frame = self.video_stream.read()
-        '''
-        if self.src_from_rtsp:
-            # Return same-sized frame for both rtsp and webcam
-            resized_frame = imutils.resize(raw_frame, width=FRAME_WIDTH, height=FRAME_HEIGHT)
-            return resized_frame
+        (grabbed, raw_frame) = self.video_stream.read()
+
+        if not grabbed:
+            print("[ERROR] Fail to grab frame.")
+            # Program will crash if grabbing fail.
+            return 0
         else:
             return raw_frame
-        '''
-        return raw_frame
 
     def stop(self):
-        self.video_stream.stop()
+        self.video_stream.release()
         print("[INFO] Stream Closed. ")

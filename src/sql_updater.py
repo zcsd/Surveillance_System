@@ -1,7 +1,7 @@
 # Class SqlUpdater, update info to SQL server
 
 '''
-Update information(NAME, DATETIME, ACTION) to office MySQL server.
+Update information(NAME, TIMESTAMP, VIDEO_PATH) to office MySQL server.
 '''
 from threading import Thread
 from queue import Queue
@@ -21,8 +21,8 @@ def backup_to_timelog(q):
     # put all information in queue to a list
     for i in range(q.qsize()):
         dict = q.get()
-        seq = str(dict['NAME']) + "  " + str(dict['DATETIME']) + \
-            "  " + str(dict['ACTION']) + "\n"
+        seq = str(dict['NAME']) + "  " + str(dict['TIMESTAMP']) + \
+            "  " + str(dict['VIDEO_PATH']) + "\n"
         seq_list.append(seq)
     # write list information to txt file
     with open('timelog/backup.txt', 'a') as f:
