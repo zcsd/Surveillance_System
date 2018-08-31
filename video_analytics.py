@@ -25,11 +25,11 @@ SHOW_GUI = True
 HOME_PATH = "/home/zichun/SurveillanceSystem"
 os.chdir(HOME_PATH)
 
-# ROI for face detection
-left_offsetX = 900
-right_offsetX = 1550
-up_offsetY = 650
-down_offsetY = 1200
+# ROI for motion detection
+left_offsetX = 850
+right_offsetX = 1650
+up_offsetY = 550
+down_offsetY = 1250
 
 # set image resize ratio for face detection, reduce calculation
 faceD_resize_ratio = 0.5
@@ -38,7 +38,7 @@ faceD_resize_ratio = 0.5
 face_detector = FaceDetector(_scale=faceD_resize_ratio)
 
 # Initialize face recognizer, method:SVM(16.0) or KNN(0.50)
-face_recognizer = FaceRecognizer(method='SVM', threshold=16.10)
+face_recognizer = FaceRecognizer(method='KNN', threshold=0.50)
 
 # Initialize SQL Updater
 sql_updater = SqlUpdater()
@@ -80,42 +80,60 @@ def process(file_path):
     # Save another processed video file
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     video_save_path = "{}/{}.avi".format("videos", file_time)
-    out = cv2.VideoWriter(video_save_path, fourcc, 35, (1344,760))
+    out = cv2.VideoWriter(video_save_path, fourcc, 15, (1344,760))
     
     # how many face images in all frames in this video
     face_cnt = 0
-    names = [] 
+
+    names = []
+    is_process = False
+    is_save = False 
     stream = cv2.VideoCapture(file_path)
 
     while True:
         (grabbed, frame) = stream.read()
         if not grabbed:
             break
-    
-        # Only interested in this ROI region(door area)
-        frame_roi = frame[up_offsetY:down_offsetY, left_offsetX:right_offsetX]
-        known_face_locs = face_detector.detect(frame_roi)
-        if len(known_face_locs) > 0:
-            face_cnt += 1
-            image_save_path = "images/" + file_time + "_" +str(face_cnt) + ".jpg"
-            # cv2.imwrite(image_save_path, frame_roi)
+        
+        # To process one frame for each 2 frames to speed up
+        if not is_process:
+            is_process = True
+        else:
+            is_process = False
+        
+        if is_process:
+            # Only interested in this ROI region(door area)
+            frame_roi = frame[up_offsetY:down_offsetY, left_offsetX:right_offsetX]
+            known_face_locs = face_detector.detect(frame_roi)
+            if len(known_face_locs) > 0:
+                face_cnt += 1
+                # to save 1 face image for each 2 processed face image
+                if not is_save:
+                    is_save = True
+                else:
+                    is_save = False
+                
+                if is_save:
+                    image_save_path = "images/" + file_time + "_" +str(face_cnt) + ".jpg"
+                    cv2.imwrite(image_save_path, frame_roi)
 
-            #print("[INFO] " + str(len(known_face_locs)) + " face found.")
-            predictions = face_recognizer.predict(
-                x_img=frame_roi, x_known_face_locs=known_face_locs)
+                #print("[INFO] " + str(len(known_face_locs)) + " face found.")
+                predictions = face_recognizer.predict(
+                    x_img=frame_roi, x_known_face_locs=known_face_locs)
 
-            for name, (top, right, bottom, left) in predictions:
-                #print("- Found {} ".format(name))
-                names.append(name)
-                cv2.rectangle(frame, (left+left_offsetX, top+up_offsetY),
-                              (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
-                cv2.rectangle(frame, (left+left_offsetX, bottom+up_offsetY),
-                              (right+left_offsetX, bottom+up_offsetY+15), (0, 255, 0), -1)
-                cv2.putText(frame, name, (int((right-left)/4)+left+left_offsetX, bottom+up_offsetY+12),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-            
+                for name, (top, right, bottom, left) in predictions:
+                    #print("- Found {} ".format(name))
+                    names.append(name)
+                    cv2.rectangle(frame, (left+left_offsetX, top+up_offsetY),
+                                (right+left_offsetX, bottom+up_offsetY), (0, 255, 0), 2)
+                    cv2.rectangle(frame, (left+left_offsetX, bottom+up_offsetY),
+                                (right+left_offsetX, bottom+up_offsetY+15), (0, 255, 0), -1)
+                    cv2.putText(frame, name, (int((right-left)/4)+left+left_offsetX, bottom+up_offsetY+12),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+        
+        # Draw the door area ROI rectangle
         cv2.rectangle(frame, (left_offsetX, up_offsetY), (right_offsetX, down_offsetY), (0, 0, 0), 2)
-
+        
         frame_to_video = imutils.resize(frame, width=1344, height=760)
         out.write(frame_to_video)
 
@@ -132,13 +150,13 @@ def process(file_path):
     else:
         person_id = name_counter.most_common(1)[0][0]
     
-    full_video_path = HOME_PATH + video_save_path
+    full_video_path = HOME_PATH + "/" + video_save_path
     
     info_dict['NAME'] = person_id
     info_dict['TIMESTAMP'] = file_time.replace('_', ' ')
     info_dict['VIDEO_PATH'] = full_video_path
 
-    #print(info_dict)
+    print(info_dict)
     sql_updater.insert(info_dict)
     # Delete original video
     os.remove(file_path)

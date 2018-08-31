@@ -27,10 +27,10 @@ HOME_PATH = "/home/zichun/SurveillanceSystem"
 os.chdir(HOME_PATH)
 
 # ROI for motion detection
-left_offsetX = 900
-right_offsetX = 1550
-up_offsetY = 650
-down_offsetY = 1200
+left_offsetX = 850
+right_offsetX = 1650
+up_offsetY = 550
+down_offsetY = 1250
 
 # set image resize ratio for motion and face detection
 motion_resize_ratio = 0.25
@@ -91,7 +91,7 @@ while True:
             print("[INFO] Start video recording...")
             video_save_path = "{}/{}.avi".format("videos_temp", ts)
             key_video_writer.start(
-                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 35)
+                video_save_path, cv2.VideoWriter_fourcc(*'MJPG'), 15)
 
     if update_consec_frames:
         num_consec_frames += 1
@@ -101,10 +101,10 @@ while True:
     
     # print("motion_frame: {}, total_frame: {}, conse_frame: {}".format(num_motion_frames, num_total_frames, num_consec_frames))
     
-    if not key_video_writer.recording and not start_recording and num_motion_frames >= 5:
+    if not key_video_writer.recording and not start_recording and num_motion_frames >= 4:
         motion_ratio = num_motion_frames / num_total_frames
-        # print("motion_ratio: {}".format(motion_ratio))
-        if motion_ratio > 0.15:
+        print("motion_ratio: {}".format(motion_ratio))
+        if motion_ratio > 0.20:
             start_recording = True
             print("[INFO] Motion detected.")
         
