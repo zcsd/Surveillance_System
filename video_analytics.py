@@ -86,6 +86,8 @@ def process(file_path):
 
     # how many face images in all frames in this video
     face_cnt = 0
+    # how may differnt face in video
+    diff_face_cnt = 0
 
     names = []
     is_process = False
@@ -108,6 +110,10 @@ def process(file_path):
             frame_roi = frame[up_offsetY:down_offsetY,
                               left_offsetX:right_offsetX]
             known_face_locs = face_detector.detect(frame_roi)
+
+            if len(known_face_locs) >= diff_face_cnt:
+                diff_face_cnt = len(known_face_locs)
+
             if len(known_face_locs) > 0:
                 face_cnt += 1
                 # to save 1 face image for each 2 processed face image
@@ -146,23 +152,24 @@ def process(file_path):
             cv2.imshow("Frame", frame_to_video)
         cv2.waitKey(1)
 
+    full_video_path = HOME_PATH + "/" + video_save_path
+
+    info_dict['TIMESTAMP'] = file_time.replace('_', ' ')
+    info_dict['VIDEO_PATH'] = full_video_path
     # Uses to count how many images for each person
     name_counter = collections.Counter(names)
 
-    # TODO: more strategy to determine muitiple person
-    if face_cnt == 0:
-        person_id = "None"
+    if diff_face_cnt == 0:
+        info_dict['NAME'] = "None"
+        print(info_dict)
+        sql_updater.insert(info_dict)
     else:
-        person_id = name_counter.most_common(1)[0][0]
+        person_id_list = name_counter.most_common(diff_face_cnt)
+        for i in range(diff_face_cnt):
+            info_dict['NAME'] = person_id_list[i][0]
+            print(info_dict)
+            sql_updater.insert(info_dict)
 
-    full_video_path = HOME_PATH + "/" + video_save_path
-
-    info_dict['NAME'] = person_id
-    info_dict['TIMESTAMP'] = file_time.replace('_', ' ')
-    info_dict['VIDEO_PATH'] = full_video_path
-
-    print(info_dict)
-    sql_updater.insert(info_dict)
     # Delete original video
     os.remove(file_path)
     out.release()
