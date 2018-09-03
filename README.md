@@ -8,11 +8,11 @@
 
 **3. Face Detection(based on HoG and CNN provided by Dlib)**
 
-**4. Face Recognition(based on CNN provided by DLib, 99.38% accuracy in LFW test)**
+**4. Face Recognition(based on ResNet provided by DLib, 99.38% accuracy in LFW test)**
 
 **5. Face Images Collection**
 
-**6. KNN/SVM Classifier Training(training on top of 128-D face encoding)**
+**6. KNN/SVM Classifier Training(training on top of 128D face embedding)**
 
 **7. Update MySQL Server with event(NAME, TIMESTAMP, VIDEO_PATH)**
 
@@ -47,6 +47,9 @@ Face detection and recognition depend on Dlib library, HoG is used in face detec
 **Normal Usage(surveillance and face recognition):**
 - ./start.sh (you need to "chmod +x start.sh" for first time using")
 
+**Auto run it in your system**
+- Please check <doc/cron_jobs.txt>
+
 **Only use basic surveillance without face recognition:**
 - python3 surveillance.py
 
@@ -54,6 +57,8 @@ Face detection and recognition depend on Dlib library, HoG is used in face detec
 
 **NOTE:**
 - You need to change some path variable and image ROI area for new setup PC and environemnt before using, detail in code comment. 
+- You need to turn GUI_SHOW flag to False if you want to run in server OS(NO GUI).
+- Processed videos are saved in <videos> folder, <videos_temp> is just for temp using.
 
 ## **Installation**
 
@@ -160,4 +165,4 @@ pip3 install pyinotify
 
 - Add web UI to dor daily view, access and control.
 
-*Aug 31 2018*
+*Sep 3 2018*
