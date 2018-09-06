@@ -20,7 +20,7 @@ import os
 
 
 # True for showing video GUI, change to false on server OS
-SHOW_GUI = True
+SHOW_GUI = False
 
 # Set default working directory
 HOME_PATH = "/home/zichun/SurveillanceSystem"

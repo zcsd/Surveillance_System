@@ -233,11 +233,11 @@ class ClassifierTrain:
         #show_clf = svm.SVC(kernel='poly', degree=3)
         #show_clf = LinearSVC()
         #show_clf = svm.SVC(kernel='rbf', gamma=0.7)
-        show_clf = svm.SVC(kernel='linear')
+        #show_clf = svm.SVC(kernel='linear')
         #show_clf = MLPClassifier(alpha=1)
         #show_clf = GaussianNB()
-        # show_clf = neighbors.KNeighborsClassifier(
-        #    n_neighbors=7, algorithm='ball_tree', weights='distance')
+        show_clf = neighbors.KNeighborsClassifier(
+            n_neighbors=7, algorithm='ball_tree', weights='distance')
         show_clf.fit(X_2d, y_1d)
         fig = plot_decision_regions(X=X_2d, y=y_1d, clf=show_clf, legend=0)
 

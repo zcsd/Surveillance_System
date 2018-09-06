@@ -20,7 +20,7 @@ import cv2
 
 
 # True for showing video GUI, change to false on server OS
-SHOW_GUI = True
+SHOW_GUI = False
 # Set default working directory
 HOME_PATH = "/home/zichun/SurveillanceSystem"
 os.chdir(HOME_PATH)
@@ -38,7 +38,7 @@ faceD_resize_ratio = 0.5
 face_detector = FaceDetector(_scale=faceD_resize_ratio)
 
 # Initialize face recognizer, method:SVM(16.0) or KNN(0.50)
-face_recognizer = FaceRecognizer(method='KNN', threshold=0.50)
+face_recognizer = FaceRecognizer(method='SVM', threshold=16.2)
 
 # Initialize SQL Updater
 sql_updater = SqlUpdater()
@@ -80,8 +80,8 @@ def process(file_path):
         '/home/zichun/SurveillanceSystem/videos_temp/', '').replace('.avi', '')
 
     # Save another processed video file
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    video_save_path = "{}/{}.avi".format("videos", file_time)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video_save_path = "{}/{}.mp4".format("videos", file_time)
     out = cv2.VideoWriter(video_save_path, fourcc, 15, (1344, 760))
 
     # how many face images in all frames in this video
@@ -103,7 +103,7 @@ def process(file_path):
         if not is_process:
             is_process = True
         else:
-            is_process = False
+            is_process = True
 
         if is_process:
             # Only interested in this ROI region(door area)
@@ -152,7 +152,7 @@ def process(file_path):
             cv2.imshow("Frame", frame_to_video)
         cv2.waitKey(1)
 
-    full_video_path = HOME_PATH + "/" + video_save_path
+    full_video_path = file_time + ".mp4"
 
     info_dict['TIMESTAMP'] = file_time.replace('_', ' ')
     info_dict['VIDEO_PATH'] = full_video_path
