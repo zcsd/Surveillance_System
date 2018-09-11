@@ -77,11 +77,11 @@ notifier.start()
 def process(file_path):
     print("[INFO] Start to process {}".format(file_path))
     file_time = file_path.replace(
-        '/home/zclin/SurveillanceSystem/videos_temp/', '').replace('.avi', '')
+        HOME_PATH + "/videos_temp/", '').replace('.avi', '')
 
     # Save another processed video file
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_save_path = "{}/{}.mp4".format("videos", file_time)
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    video_save_path = "{}/{}.avi".format("videos", file_time)
     out = cv2.VideoWriter(video_save_path, fourcc, 15, (1344, 760))
 
     # how many face images in all frames in this video
@@ -125,7 +125,7 @@ def process(file_path):
                 if is_save:
                     image_save_path = "images/" + file_time + \
                         "_" + str(face_cnt) + ".jpg"
-                    cv2.imwrite(image_save_path, frame_roi)
+                    cv2.imwrite(image_save_path.replace(":", "-"), frame_roi)
 
                 #print("[INFO] " + str(len(known_face_locs)) + " face found.")
                 predictions = face_recognizer.predict(
@@ -152,7 +152,7 @@ def process(file_path):
             cv2.imshow("Frame", frame_to_video)
         cv2.waitKey(1)
 
-    full_video_path = file_time + ".mp4"
+    full_video_path = file_time.replace(":","-") + ".mp4"
 
     info_dict['TIMESTAMP'] = file_time.replace('_', ' ')
     info_dict['VIDEO_PATH'] = full_video_path
@@ -173,6 +173,8 @@ def process(file_path):
     # Delete original video
     os.remove(file_path)
     out.release()
+    os.system("ffmpeg -loglevel panic -i videos/{}.avi videos/{}.mp4".format(file_time, file_time.replace(":", "-")))
+    os.remove("videos/{}.avi".format(file_time))
     stream.release()
     cv2.destroyAllWindows()
 
