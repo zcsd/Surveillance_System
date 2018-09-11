@@ -20,10 +20,10 @@ import os
 
 
 # True for showing video GUI, change to false on server OS
-SHOW_GUI = False
+SHOW_GUI = True
 
 # Set default working directory
-HOME_PATH = "/home/zichun/SurveillanceSystem"
+HOME_PATH = "/home/zclin/SurveillanceSystem"
 os.chdir(HOME_PATH)
 
 # ROI for motion detection

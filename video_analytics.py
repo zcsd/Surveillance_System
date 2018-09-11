@@ -20,9 +20,9 @@ import cv2
 
 
 # True for showing video GUI, change to false on server OS
-SHOW_GUI = False
+SHOW_GUI = True
 # Set default working directory
-HOME_PATH = "/home/zichun/SurveillanceSystem"
+HOME_PATH = "/home/zclin/SurveillanceSystem"
 os.chdir(HOME_PATH)
 
 # ROI for motion detection
@@ -70,14 +70,14 @@ class EventHandler(pyinotify.ProcessEvent):
 # Note: notifier is threaded safe
 notifier = pyinotify.ThreadedNotifier(wm, EventHandler())
 mask = pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CREATE
-wdd = wm.add_watch('/home/zichun/SurveillanceSystem/videos_temp', mask)
+wdd = wm.add_watch(HOME_PATH + "/videos_temp", mask)
 notifier.start()
 
 
 def process(file_path):
     print("[INFO] Start to process {}".format(file_path))
     file_time = file_path.replace(
-        '/home/zichun/SurveillanceSystem/videos_temp/', '').replace('.avi', '')
+        '/home/zclin/SurveillanceSystem/videos_temp/', '').replace('.avi', '')
 
     # Save another processed video file
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
