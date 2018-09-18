@@ -20,7 +20,7 @@ import cv2
 
 
 # True for showing video GUI, change to false on server OS
-SHOW_GUI = True
+SHOW_GUI = False
 # Set default working directory
 HOME_PATH = "/home/zclin/SurveillanceSystem"
 os.chdir(HOME_PATH)
@@ -73,6 +73,16 @@ mask = pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CREATE
 wdd = wm.add_watch(HOME_PATH + "/videos_temp", mask)
 notifier.start()
 
+def send_backup_to_sql():
+    with open('timelog/backup.txt', 'r+') as f:
+        for cnt, line in enumerate(f):
+           if len(line) > 2:
+                all = line.split()
+                info_dict['NAME'] = all[0]
+                info_dict['TIMESTAMP'] = all[1] + ' ' + all[2]
+                info_dict['VIDEO_PATH'] = all[3]
+                sql_updater.insert(info_dict)
+        f.truncate(0)
 
 def process(file_path):
     print("[INFO] Start to process {}".format(file_path))
@@ -159,7 +169,7 @@ def process(file_path):
     # Uses to count how many images for each person
     name_counter = collections.Counter(names)
 
-    if diff_face_cnt == 0:
+    if diff_face_cnt == 0 or face_cnt < 2:
         info_dict['NAME'] = "None"
         print(info_dict)
         sql_updater.insert(info_dict)
@@ -178,6 +188,8 @@ def process(file_path):
     stream.release()
     cv2.destroyAllWindows()
 
+# send backup to sql
+send_backup_to_sql()
 
 while True:
     '''
