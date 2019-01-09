@@ -24,10 +24,32 @@ This project is to develop a office/home/factory surveillance system, ip camera(
 
 Face detection and recognition depend on Dlib library, HoG is used in face detection because it's fast and accurate; Dlib return a 128-dimension face encoding for each face detected, on top of this 128D feature vector, I train a KNN/SVM classifier to recognize the person from my face database, the accuracy is very nice if the face quality is good. The face recognition model in DLib is a ResNet network with 27 conv layers, was trained from scratch on a dataset of about 3 million faces, achive 99.38% accuracy in LFW.
 
+
+## **Information**
+
+**How to access IP camera via web?**
+- Must use Chrome, install "NACL Web Plug-in" in Chrome Apps.
+- Open "NACL Web Plug-in" in Chrome, just type camera IP address (172.19.80.36)
+
+```
+There are two sets of username and password.
+1. For admin purpose, you can change the setting and add user account.
+   username: admin      password: starasia2019
+2. User account, only can view.
+   username: satcam002  password: starasia2018
+```
+
+**How to access Surveillance Server?**
+- You can use "ssh" or "putty" to access surveillance server(172.19.80.26) by console command.
+- You can access the surveillance server home folder from (sftp://172.19.80.26/home/zichun)
+```
+   username: zichun     password: 1024
+```
+
 ## **Usage**
 
 **Directory structure for face database**
-- Put face images into <SurveillanceSystem/faces/train> folder for next setp training, each person has one folder. You also can put test face images in <SurveillanceSystem/faces/test> if you want training accuracy.
+- Put face images into <SurveillanceSystem/faces/train> folder for next setp training, each person has one folder, name the folder name as the person name, for the number of images for each person, I recommend 15 images for each person. You also can put test face images in <SurveillanceSystem/faces/test> if you want training accuracy.
 
 ```
     <SurveillanceSystem/faces/train>/
@@ -43,6 +65,7 @@ Face detection and recognition depend on Dlib library, HoG is used in face detec
 
 **Train a new classifier when face images databse changed:**
 - python3 training.py
+- After training, remember to copy the trained classifer(in <SurveillanceSystem/classifier>) to production server folder. 
 
 **Normal Usage(surveillance and face recognition):**
 - ./start.sh (you need to "chmod +x start.sh" for first time using")
@@ -93,6 +116,7 @@ Clone the code from github:
 mkdir dlib; cd dlib
 
 git clone https://github.com/davisking/dlib.git
+cd dlib
 
 ```
 
@@ -155,16 +179,10 @@ pip3 install pyinotify
 
 - Reconnect SQL server if networt revover.
 
-- Resend inforamtion in backup timelog to SQL server if network recover.
-
 - Optimize multiple face recogniton in video-based analytics.
 
 - Improve accuracy for unknown face recognition.
 
-- Read config from file for easy setting.
+- Auto Read config from file for easy setting.
 
-- Be able to ignore light on/off event.
-
-- Add web UI to dor daily view, access and control.
-
-*Sep 3 2018*
+*Jan 9 2019*
