@@ -81,7 +81,7 @@ There are two sets of username and password.
 **NOTE:**
 - You need to change some path variable and image ROI area for new setup PC and environemnt before using, detail in code comment. 
 - You need to turn GUI_SHOW flag to False if you want to run in server OS(NO GUI).
-- Processed videos are saved in <videos> folder, <videos_temp> is just for temp using.
+- Processed videos are saved in < videos > folder, <videos_temp> is just for temp using.
 
 ## **Installation**
 
