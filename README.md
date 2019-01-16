@@ -24,28 +24,6 @@ This project is to develop a office/home/factory surveillance system, ip camera(
 
 Face detection and recognition depend on Dlib library, HoG is used in face detection because it's fast and accurate; Dlib return a 128-dimension face encoding for each face detected, on top of this 128D feature vector, I train a KNN/SVM classifier to recognize the person from my face database, the accuracy is very nice if the face quality is good. The face recognition model in DLib is a ResNet network with 27 conv layers, was trained from scratch on a dataset of about 3 million faces, achive 99.38% accuracy in LFW.
 
-
-## **Information**
-
-**How to access IP camera via web?**
-- Must use Chrome, install "NACL Web Plug-in" in Chrome Apps.
-- Open "NACL Web Plug-in" in Chrome, just type camera IP address (172.19.80.36)
-
-```
-There are two sets of username and password.
-1. For admin purpose, you can change the setting and add user account.
-   username: admin      password: starasia2019
-2. User account, only can view.
-   username: satcam002  password: starasia2018
-```
-
-**How to access Surveillance Server?**
-- You can use "ssh" or "putty" to access surveillance server(172.19.80.26) by console command.
-- You can access the surveillance server home folder from (sftp://172.19.80.26/home/zichun)
-```
-   username: zichun     password: 1024
-```
-
 ## **Usage**
 
 **Directory structure for face database**

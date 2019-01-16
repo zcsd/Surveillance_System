@@ -6,7 +6,7 @@ import cv2
 import time
 
 
-RTSP_URL = "rtsp://satcam002:starasia2018@172.19.80.36:554/cam/realmonitor?channel=1&subtype=0"
+RTSP_URL = "rtsp://username:password@ip:port/cam/realmonitor?channel=1&subtype=0" # need to edit
 
 
 class FrameGrabber:
